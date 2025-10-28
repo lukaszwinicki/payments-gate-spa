@@ -1,0 +1,8 @@
+export enum TransactionStatus {
+    SUCCESS = 'SUCCESS',
+    FAIL = 'FAIL',
+    PENDING = 'PENDING',
+    REFUND_SUCCESS = 'REFUND_SUCCESS',
+    REFUND_FAIL = 'REFUND_FAIL',
+    REFUND_PENDING = 'REFUND_PENDING'
+}
