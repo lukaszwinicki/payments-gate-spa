@@ -1,7 +1,7 @@
 <template>
-  <PaymentSummary />
+  <PaymentDetails />
 </template>
 
 <script lang="ts" setup>
-import PaymentSummary from './views/PaymentSummary.vue'
+import PaymentDetails from './views/PaymentDetails.vue';
 </script>
