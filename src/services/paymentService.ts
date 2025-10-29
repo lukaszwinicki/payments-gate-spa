@@ -1,12 +1,8 @@
-import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentRequest, PaymentResponse } from '@/types/payment'
+import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentRequest, PaymentResponse } from '@/types/Payment'
 
 export class PaymentService {
 
-    private baseUrl = import.meta.env.VITE_API_BASE_URL
-
-    constructor() {
-        this.baseUrl = import.meta.env.VITE_API_BASE_URL
-    }
+    constructor(private baseUrl = import.meta.env.VITE_API_BASE_URL) {}
 
     private getHeaders(): HeadersInit {
         const headers: HeadersInit = {

@@ -1,4 +1,4 @@
-import { TransactionStatus } from '@/enums/transactionStatus'
+import { TransactionStatus } from '@/enums/TransactionStatus'
 
 export function getTransactionHeader(status: TransactionStatus | undefined) {
   switch (status) {

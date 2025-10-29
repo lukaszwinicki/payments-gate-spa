@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import PaymentDetails from '@/views/PaymentDetails.vue'
+import PaymentDetails from '@/views/PaymentDetailsView.vue'
 
 const routes = [
   {

@@ -1,0 +1,5 @@
+export enum PaymentMethod {
+    PAYMENT_METHOD_TPAY = 'TPAY',
+    PAYMENT_METHOD_PAYNOW = 'PAYNOW',
+    PAYMENT_METHOD_NODA = 'NODA'
+}
