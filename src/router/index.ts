@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import PaymentDetails from '@/views/PaymentDetailsView.vue'
+import PaymentDetailsView from '@/views/PaymentDetailsView.vue'
+import PaymentStatusView from '@/views/PaymentStatusView.vue'
 
 const routes = [
   {
     path: '/payment/:payment_link_id',
     name: 'PaymentLink',
-    component: PaymentDetails
+    component: PaymentDetailsView
+  },
+  {
+    path: '/payment-status',
+    name: 'PaymentStatus',
+    component: PaymentStatusView
   }
 ]
 
