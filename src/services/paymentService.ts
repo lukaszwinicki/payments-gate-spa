@@ -1,8 +1,8 @@
-import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentRequest, PaymentResponse } from '@/types/Payment'
+import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentRequest, PaymentResponse, PaymentStatusRequest, PaymentStatusResponse } from '@/types/Payment'
 
 export class PaymentService {
 
-    constructor(private baseUrl = import.meta.env.VITE_API_BASE_URL) {}
+    constructor(private baseUrl = import.meta.env.VITE_API_BASE_URL) { }
 
     private getHeaders(): HeadersInit {
         const headers: HeadersInit = {
@@ -48,6 +48,22 @@ export class PaymentService {
             throw { status: paymentResponse.status, data: paymentResult };
         }
         return paymentResult
+    }
+
+    async getPaymentStatus(id: PaymentStatusRequest): Promise<PaymentStatusResponse> {
+
+        const { uuid } = id;
+        const paymentStatusResponse = await fetch(`${this.baseUrl}/api/transaction/${uuid}/status`, {
+            method: 'GET',
+            headers: this.getHeaders(),
+        })
+
+        const paymentResult = await paymentStatusResponse.json()
+
+        if (!paymentStatusResponse.ok) {
+            throw { status: paymentStatusResponse.status, data: paymentResult };
+        }
+        return paymentResult as PaymentStatusResponse;
     }
 }
 

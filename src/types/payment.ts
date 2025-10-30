@@ -16,17 +16,29 @@ export interface PaymentDetailsRequest {
 }
 
 export interface TransactionDetails {
-    status: string;
-    amount: string;
-    currency: string;
-    paymentMethod: string;
+    status: string
+    amount: string
+    currency: string
+    paymentMethod: string
 }
 
 export interface PaymentDetailsResponse {
     payment: {
-        paymentLinkId: string,
-        amount: string,
+        paymentLinkId: string
+        amount: string
         currency: string
     };
-    transaction: TransactionDetails | null;
+    transaction: TransactionDetails | null
+}
+
+export interface PaymentStatusRequest {
+    uuid: string
+}
+
+export interface PaymentStatusResponse {
+    status: string
+    amount: string
+    currency: string
+    paymentMethod: string
+    returnUrl: string
 }

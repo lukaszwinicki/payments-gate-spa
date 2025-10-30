@@ -27,6 +27,12 @@
                 </template>
               </div>
             </div>
+            <div class="mt-6 flex justify-center">
+              <button @click="returnToMerchant"
+                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200">
+                Return to merchant
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -122,6 +128,11 @@ const transactionDetails = computed(() => ({
   'Payment Method': transaction.value?.paymentMethod ?? '-',
   Status: transaction.value?.status ?? '-',
 }))
+
+function returnToMerchant() {
+    isLoading.value = true
+    window.location.href = transaction.value?.returnUrl;
+}
 
 const getPaymentDetails = async (id: string) => {
   try {
