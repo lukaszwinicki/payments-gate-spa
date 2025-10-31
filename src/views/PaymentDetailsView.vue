@@ -5,8 +5,12 @@
     </div>
     <div v-else>
       <div v-if="statusMessage" class="text-center py-12">
-        <h1 :class="statusMessage.class + ' text-2xl font-bold'">{{ statusMessage.title }}</h1>
-        <p class="text-gray-500 mt-2">{{ statusMessage.text }}</p>
+        <div class="flex items-center justify-center py-12 px-4">
+          <div class="max-w-xl w-full">
+            <h1 :class="statusMessage.class + ' text-4xl font-bold mb-4 text-center'">{{ statusMessage.title }}</h1>
+            <p class="text-gray-500 mt-2">{{ statusMessage.text }}</p>
+          </div>
+        </div>
       </div>
       <div v-else-if="isPaid" class="text-center py-12">
         <div class="flex items-center justify-center py-12 px-4">
@@ -130,8 +134,8 @@ const transactionDetails = computed(() => ({
 }))
 
 function returnToMerchant() {
-    isLoading.value = true
-    window.location.href = transaction.value?.returnUrl;
+  isLoading.value = true
+  window.location.href = transaction.value?.returnUrl;
 }
 
 const getPaymentDetails = async (id: string) => {
@@ -145,14 +149,14 @@ const getPaymentDetails = async (id: string) => {
     isPaid.value = !!transaction.value
   } catch (err: any) {
 
-    const status = err.status as keyof typeof map
-    const message = err.data?.error ?? err.message ?? 'An unexpected error occurred'
-    error.value = message
-
     const map = {
       410: isExpired,
       404: isNotFound,
     }
+
+    const status = err.status as keyof typeof map
+    const message = err.data?.error ?? err.message ?? 'An unexpected error occurred'
+    error.value = message
 
     if (status && map[status]) map[status].value = true
   } finally {
@@ -169,13 +173,12 @@ watch(
 const statusMessage = computed(() => {
   if (!error.value && !isExpired.value && !isNotFound.value) return null
   const title = isExpired.value ? 'Payment link expired' : isNotFound.value ? 'Not found' : 'Error'
-  const text =
-    error.value ??
-    (isExpired.value
-      ? 'This link is no longer active. Please contact support.'
-      : isNotFound.value
-        ? 'The payment link was not found.'
-        : 'An unexpected error occurred.')
+  const text = (() => {
+    if (isExpired.value) return 'This link is no longer active. Please contact support.'
+    if (isNotFound.value) return 'The payment link was not found.'
+    if (error.value) return error.value
+    return 'An unexpected error occurred.'
+  })()
   return { title, text, class: 'text-red-500' }
 })
 
