@@ -38,9 +38,9 @@
 
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/TransactionStatusService'
-import { paymentService } from '@/services/PaymentService';
-import type { TransactionStatus } from '@/enums/TransactionStatus';
+import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/TransactionStatus'
+import { paymentService } from '@/services/TransactionService';
+import type { TransactionStatus } from '@/enums/Status';
 
 const route = useRoute();
 const isLoading = ref(false)
@@ -49,6 +49,7 @@ const returnUrl = ref('/');
 const amount = ref<string | null>(null)
 const currency = ref<string | null>(null)
 const paymentMethod = ref<string | null>(null)
+const uuid = route.query.transaction_uuid as string | undefined;
 
 const transactionHeader = computed(() => getTransactionHeader(status.value as TransactionStatus))
 const transactionMessage = computed(() => getTransactionMessage(status.value as TransactionStatus))
@@ -62,11 +63,14 @@ const transactionDetails = computed(() => ({
 }))
 
 function returnToMerchant() {
-    isLoading.value = true
+  isLoading.value = true
+  if (returnUrl.value) {
     window.location.href = returnUrl.value;
+  } else {
+    console.warn('No return URL provided')
+    isLoading.value = false
+  }
 }
-
-const uuid = route.query.transaction_uuid;
 
 onMounted(async () => {
     if (!uuid) {

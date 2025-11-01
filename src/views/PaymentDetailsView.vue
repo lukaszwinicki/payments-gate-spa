@@ -62,8 +62,8 @@
               </FormField>
             </Section>
             <Section title="Transaction Details" :withWrapper="true">
-              <SummaryRow label="Transaction ID" :value="payment?.paymentLinkId" />
-              <SummaryRow label="Amount" :value="`${payment?.amount ?? '-'} ${payment?.currency ?? ''}`"
+              <SummaryRow label="Transaction ID" :value="payment?.payment.paymentLinkId" />
+              <SummaryRow label="Amount" :value="`${payment?.payment.amount ?? '-'} ${payment?.payment.currency ?? ''}`"
                 valueColor="text-green-600" />
               <SummaryRow label="Full Name" :value="fullname" />
               <SummaryRow label="Email" :value="email" />
@@ -105,14 +105,15 @@ import PaymentMethodTile from '@/components/PaymentMethodTile.vue'
 import FormField from '@/components/FormField.vue'
 import Section from '@/components/Section.vue'
 import SummaryRow from '@/components/SummaryRow.vue'
-import { paymentService } from '@/services/PaymentService'
+import { paymentService } from '@/services/TransactionService'
 import { PaymentMethod } from '@/enums/PaymentMethod'
-import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/TransactionStatusService'
-import type { PaymentRequest } from '@/types/Payment'
+import { TransactionStatus } from '@/enums/Status'
+import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/TransactionStatus'
+import type { PaymentRequest, PaymentDetailsResponse } from '@/types/Pay'
 
 const route = useRoute()
-const payment = ref<any | null>(null)
-const transaction = ref<any | null>(null)
+const payment = ref<PaymentDetailsResponse | null>(null)
+const transaction = computed(() => payment.value?.transaction ?? null)
 const fullname = ref('')
 const email = ref('')
 const error = ref<string | null>(null)
@@ -122,12 +123,12 @@ const isPaid = ref(false)
 const isLoading = ref(true)
 const redirectToProvider = ref(false)
 const selectedPaymentMethod = ref<PaymentMethod | null>(null)
-const transactionHeader = computed(() => getTransactionHeader(transaction.value?.status))
-const transactionMessage = computed(() => getTransactionMessage(transaction.value?.status))
-const statusColorClass = computed(() => getStatusColorClass(transaction.value?.status))
+const transactionHeader = computed(() => getTransactionHeader(transaction.value?.status as TransactionStatus | undefined))
+const transactionMessage = computed(() => getTransactionMessage(transaction.value?.status as TransactionStatus | undefined))
+const statusColorClass = computed(() => getStatusColorClass(transaction.value?.status as TransactionStatus | undefined))
 
 const transactionDetails = computed(() => ({
-  'Transaction ID': payment.value?.paymentLinkId ?? '-',
+  'Transaction ID': payment.value?.payment.paymentLinkId ?? '-',
   Amount: `${transaction.value?.amount ?? '-'} ${transaction.value?.currency ?? ''}`,
   'Payment Method': transaction.value?.paymentMethod ?? '-',
   Status: transaction.value?.status ?? '-',
@@ -135,17 +136,20 @@ const transactionDetails = computed(() => ({
 
 function returnToMerchant() {
   isLoading.value = true
-  window.location.href = transaction.value?.returnUrl;
+  if (transaction.value?.returnUrl) {
+    window.location.href = transaction.value.returnUrl;
+  } else {
+    console.warn('No return URL provided')
+    isLoading.value = false
+  }
 }
 
 const getPaymentDetails = async (id: string) => {
   try {
-
     isLoading.value = true
     const response = await paymentService.paymentDetails({ paymentLinkId: id })
 
-    payment.value = response.payment
-    transaction.value = response.transaction
+    payment.value = response
     isPaid.value = !!transaction.value
   } catch (err: any) {
 
@@ -157,7 +161,7 @@ const getPaymentDetails = async (id: string) => {
     const status = err.status as keyof typeof map
     const message = err.data?.error ?? err.message ?? 'An unexpected error occurred'
     error.value = message
-
+    
     if (status && map[status]) map[status].value = true
   } finally {
     isLoading.value = false
@@ -183,7 +187,6 @@ const statusMessage = computed(() => {
 })
 
 const createTransaction = async () => {
-
   const missing = [
     !fullname.value && 'Full name',
     !email.value && 'Email',
@@ -201,11 +204,10 @@ const createTransaction = async () => {
   }
 
   try {
-
     const paymentData: PaymentRequest = {
       paymentLinkId: route.params.payment_link_id as string,
-      amount: payment.value.amount,
-      currency: payment.value.currency,
+      amount: Number(payment.value?.payment.amount ?? 0),
+      currency: payment.value?.payment.currency ?? '',
       paymentMethod: selectedPaymentMethod.value as PaymentMethod,
       fullname: fullname.value,
       email: email.value,

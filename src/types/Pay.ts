@@ -20,6 +20,7 @@ export interface TransactionDetails {
     amount: string
     currency: string
     paymentMethod: string
+    returnUrl: string
 }
 
 export interface PaymentDetailsResponse {
