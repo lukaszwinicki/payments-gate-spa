@@ -1,4 +1,4 @@
-import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentRequest, PaymentResponse, PaymentStatusRequest, PaymentStatusResponse } from '@/types/Pay'
+import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentRequest, PaymentResponse, PaymentStatusRequest, PaymentStatusResponse } from '@/types/PaymentsRequests'
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 
 export class PaymentService {

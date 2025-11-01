@@ -105,11 +105,11 @@ import PaymentMethodTile from '@/components/PaymentMethodTile.vue'
 import FormField from '@/components/FormField.vue'
 import Section from '@/components/Section.vue'
 import SummaryRow from '@/components/SummaryRow.vue'
-import { paymentService } from '@/services/TransactionService'
+import { paymentService } from '@/services/PaymentService'
 import { PaymentMethod } from '@/enums/PaymentMethod'
-import { TransactionStatus } from '@/enums/Status'
+import { TransactionStatus } from '@/enums/TransactionStatus'
 import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/TransactionStatus'
-import type { PaymentRequest, PaymentDetailsResponse } from '@/types/Pay'
+import type { PaymentRequest, PaymentDetailsResponse } from '@/types/PaymentsRequests'
 
 const route = useRoute()
 const payment = ref<PaymentDetailsResponse | null>(null)

@@ -39,8 +39,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/TransactionStatus'
-import { paymentService } from '@/services/TransactionService';
-import type { TransactionStatus } from '@/enums/Status';
+import { paymentService } from '@/services/PaymentService';
+import type { TransactionStatus } from '@/enums/TransactionStatus';
 
 const route = useRoute();
 const isLoading = ref(false)
