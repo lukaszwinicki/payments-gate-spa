@@ -6,7 +6,7 @@
         <p class="text-gray-500">Enter your email and we’ll send you reset instructions</p>
       </div>
 
-      <form @submit.prevent="handleReset" class="space-y-5">
+      <form @submit.prevent="handleForgotPassword" class="space-y-5">
         <div>
           <label for="email" class="block text-gray-600 font-medium mb-1">Email</label>
           <input v-model="email" type="email" id="email" required placeholder="Enter your email"
@@ -44,24 +44,30 @@
 
 <script setup>
 import { ref } from 'vue';
+import axios from "axios";
 
 const email = ref('');
 const isLoading = ref(false);
 const message = ref('');
 const errorMessage = ref('');
 
-function handleReset() {
+const handleForgotPassword = async () => {
   isLoading.value = true;
   message.value = '';
   errorMessage.value = '';
 
-  setTimeout(() => {
+  try {
+    await axios.get("/sanctum/csrf-cookie");
+
+    await axios.post("/forgot-password", {
+      email: email.value,
+    });
+    message.value = 'Password reset link sent to your email.';
+   
+  } catch (error) {
+    errorMessage.value = error.response.data.message;
+  } finally {
     isLoading.value = false;
-    if (email.value.includes('@')) {
-      message.value = 'Password reset link sent to your email.';
-    } else {
-      errorMessage.value = 'Please enter a valid email address.';
-    }
-  }, 1200);
+  }
 }
 </script>

@@ -5,6 +5,7 @@ import AdminLayout from '@/layouts/AdminLayout.vue'
 import LoginView from '@/views/LoginView.vue'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import CreateTransactionView from '@/views/admin/CreateTransactionView.vue'
 import CreatePaymentLinkView from '@/views/admin/CreatePaymentLinkView.vue'
 import PaymentRefundsView from '@/views/admin/PaymentRefundsView.vue'
@@ -26,6 +27,12 @@ const routes = [
   {
     path: '/forgot-password',
     component: ForgotPasswordView
+  },
+  {
+    path: '/reset-password/:token',
+    name: 'reset-password',
+    component: ResetPasswordView,
+    props: true
   },
   {
     path: '/register',

@@ -62,7 +62,10 @@
 
 <script setup>
 import { ref } from 'vue';
+import axios from "axios";
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const name = ref('');
 const email = ref('');
 const password = ref('');
@@ -71,18 +74,25 @@ const isLoading = ref(false);
 const message = ref('');
 const errorMessage = ref('');
 
-function handleRegister() {
-    isLoading.value = true;
-    message.value = '';
-    errorMessage.value = '';
+const handleRegister = async () => {
+  isLoading.value = true;
+  errorMessage.value = "";
 
-    setTimeout(() => {
-        isLoading.value = false;
-        if (password.value !== confirmPassword.value) {
-            errorMessage.value = 'Passwords do not match';
-        } else {
-            message.value = 'Account created successfully!';
-        }
-    }, 1200);
+  try {
+    await axios.get("/sanctum/csrf-cookie");
+
+    await axios.post("/register", {
+      name: name.value,
+      email: email.value,
+      password: password.value,
+      password_confirmation: confirmPassword.value,
+    });
+
+    router.push("/admin");
+  } catch (error) {
+    errorMessage.value = error.response.data.message;
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>

@@ -56,24 +56,40 @@
 
 <script setup>
 import { ref } from "vue";
+import axios from "axios";
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const email = ref("");
 const password = ref("");
 const rememberMe = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref("");
 
-function handleLogin() {
+const handleLogin = async () => {
   isLoading.value = true;
   errorMessage.value = "";
 
-  setTimeout(() => {
-    isLoading.value = false;
-    if (email.value === "test@example.com" && password.value === "password") {
-      alert("Login successful!");
+  try {
+    await axios.get("/sanctum/csrf-cookie");
+
+    await axios.post("/login", {
+      email: email.value,
+      password: password.value,
+      remember: rememberMe.value,
+    });
+    router.push("/admin");
+  } catch (error) {
+    if (error.response.status === 422) {
+      errorMessage.value = "Invalid credentials";
     } else {
-      errorMessage.value = "Invalid email or password";
+      errorMessage.value = "An error occurred";
     }
-  }, 1200);
+    if (error.response.status === 423) {
+      errorMessage.value = "Account is locked";
+    }
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
