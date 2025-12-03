@@ -1,15 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import axios from 'axios'
 import PaymentDetailsView from '@/views/PaymentDetailsView.vue'
 import PaymentStatusView from '@/views/PaymentStatusView.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
-import LoginView from '@/views/LoginView.vue'
-import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
-import RegisterView from '@/views/RegisterView.vue'
-import ResetPasswordView from '@/views/ResetPasswordView.vue'
-import CreateTransactionView from '@/views/admin/CreateTransactionView.vue'
-import CreatePaymentLinkView from '@/views/admin/CreatePaymentLinkView.vue'
-import PaymentRefundsView from '@/views/admin/PaymentRefundsView.vue'
-import AccessKeysView from '@/views/admin/AccessKeysView.vue'
+import LoginView from '@/views/auth/LoginView.vue'
+import ForgotPasswordView from '@/views/auth/ForgotPasswordView.vue'
+import RegisterView from '@/views/auth/RegisterView.vue'
+import ResetPasswordView from '@/views/auth/ResetPasswordView.vue'
+import CreateTransactionView from '@/views/CreateTransactionView.vue'
+import CreatePaymentLinkView from '@/views/CreatePaymentLinkView.vue'
+import PaymentRefundsView from '@/views/PaymentRefundsView.vue'
+import AccessKeysView from '@/views/profile/AccessKeysView.vue'
 
 const routes = [
   {
@@ -41,6 +42,7 @@ const routes = [
   {
     path: '/admin',
     component: AdminLayout,
+    meta: { requiresAuth: true },
     children: [
       { path: 'create-transaction', component: CreateTransactionView },
       { path: 'create-payment-link', component: CreatePaymentLinkView },
@@ -53,6 +55,17 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+router.beforeEach(async (to, from, next) => {
+  if (!to.meta.requiresAuth) return next()
+
+  try {
+    await axios.get('/user', { withCredentials: true })
+    next()
+  } catch (error) {
+    next('/login')
+  }
 })
 
 export default router
