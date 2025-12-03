@@ -1,5 +1,5 @@
 <template>
-    <div class="max-w-lg mx-auto p-6 bg-white rounded-xl shadow-lg space-y-6">
+    <div class="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg space-y-6 relative">
         <h2 class="text-xl font-semibold text-gray-800">Your API Credentials</h2>
 
         <div class="relative">
@@ -22,6 +22,12 @@
             </span>
         </div>
 
+        <div v-if="isLoading" class="absolute inset-0 z-20 flex items-center justify-center
+            bg-white/40 backdrop-blur-sm rounded-xl">
+            <div class="w-10 h-10 border-4 border-blue-500/40 border-t-blue-500
+                rounded-full animate-spin"></div>
+        </div>
+
         <p class="text-gray-500 text-sm">
             Click on a key to copy it to your clipboard.
         </p>
@@ -29,11 +35,12 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import axios from 'axios'
 
-const apiKey = ref('037fa239-e970-49c0-b990-6eed62947a97')
-const secretKey = ref('037fa239-e970-49c0-b990-6eed62947a97')
-
+const isLoading = ref(false)
+const apiKey = ref("")
+const secretKey = ref("")
 const copied = reactive({ api: false, secret: false })
 
 function copyToClipboard(text, type) {
@@ -42,4 +49,15 @@ function copyToClipboard(text, type) {
         setTimeout(() => (copied[type] = false), 1500)
     })
 }
+
+onMounted(async () => {
+    isLoading.value = true;
+    try {
+        const { data } = await axios.get('/access-keys');
+        apiKey.value = data.api_key;
+        secretKey.value = data.secret_key;
+    } finally {
+        isLoading.value = false;
+    }
+});
 </script>
