@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import axios from 'axios'
+import TransactionsView from '@/views/payments/TransactionsView.vue'
 import PaymentDetailsView from '@/views/PaymentDetailsView.vue'
 import PaymentStatusView from '@/views/PaymentStatusView.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
@@ -44,6 +45,7 @@ const routes = [
     component: AdminLayout,
     meta: { requiresAuth: true },
     children: [
+      { path: 'transactions', component: TransactionsView },
       { path: 'create-transaction', component: CreateTransactionView },
       { path: 'create-payment-link', component: CreatePaymentLinkView },
       { path: 'payment-refunds', component: PaymentRefundsView },

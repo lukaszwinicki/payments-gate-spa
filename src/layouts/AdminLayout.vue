@@ -7,8 +7,8 @@
                 </div>
                 <nav class="flex flex-col p-4 space-y-1">
                     <RouterLink v-for="link in navigationLinks" :key="link.name" :to="link.to"
-                        class="flex items-center px-4 py-2 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
-                        :class="{ 'bg-blue-100 text-blue-600 font-semibold': $route.path === link.to }">
+                        class="flex items-center px-4 py-2 font-semibold text-gray-500 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                        :class="{ 'bg-blue-100 text-blue-500 font-semibold': $route.path === link.to }">
                         <component :is="link.icon" class="w-5 h-5 mr-3" />
                         {{ link.name }}
                     </RouterLink>
@@ -16,7 +16,7 @@
             </div>
 
             <div class="p-4 border-t border-gray-100 text-sm text-gray-500">
-                <button @click="logout" class="w-full text-left text-red-500 font-semibold hover:text-red-500">
+                <button @click="handleLogout" class="w-full text-left text-red-500 font-semibold hover:text-red-500">
                     Logout
                 </button>
             </div>
@@ -41,17 +41,22 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
+import axios from 'axios'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { computed } from 'vue'
 import {
     LinkIcon,
     ServerIcon,
     ReceiptRefundIcon,
-    KeyIcon
+    KeyIcon,
+    BanknotesIcon
 } from '@heroicons/vue/24/outline'
-import { computed } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
+const isLoading = ref(false)
+
 
 const user = {
     name: 'Admin User',
@@ -60,6 +65,7 @@ const user = {
 }
 
 const navigationLinks = [
+    { name: 'Transactions', to: '/admin/transactions', icon: BanknotesIcon },
     { name: 'Create Transaction', to: '/admin/create-transaction', icon: ServerIcon },
     { name: 'Create Payment Link', to: '/admin/create-payment-link', icon: LinkIcon },
     { name: 'Payment Refunds', to: '/admin/payment-refunds', icon: ReceiptRefundIcon },
@@ -71,7 +77,21 @@ const currentPage = computed(() => {
     return page ? page.name : 'Unknown Page'
 })
 
-const logout = () => {
-    router.push('/login')
+const handleLogout = async () => {
+    isLoading.value = true
+
+    try {
+        await axios.get('/sanctum/csrf-cookie', {
+            withCredentials: true
+        })
+        await axios.post('/logout', {}, {
+            withCredentials: true,
+        })
+        router.push('/login')
+    } catch (error) {
+        console.error('Error during logout:', error)
+    } finally {
+        isLoading.value = false
+    }
 }
 </script>
