@@ -31,7 +31,7 @@ const routes = [
     component: ForgotPasswordView
   },
   {
-    path: '/reset-password/:token',
+    path: '/reset-password',
     name: 'reset-password',
     component: ResetPasswordView,
     props: true
@@ -62,10 +62,14 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   if (!to.meta.requiresAuth) return next()
 
-  try {
-    await axios.get('/user', { withCredentials: true })
+  const token = localStorage.getItem('token')
+
+  if (token) {
+    if (!axios.defaults.headers.common['Authorization']) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    }
     next()
-  } catch (error) {
+  } else {
     next('/login')
   }
 })

@@ -57,9 +57,7 @@ const handleForgotPassword = async () => {
   errorMessage.value = '';
 
   try {
-    await axios.get("/sanctum/csrf-cookie");
-
-    await axios.post("/forgot-password", {
+    await axios.post("/api/forgot-password", {
       email: email.value,
     });
     message.value = 'Password reset link sent to your email.';

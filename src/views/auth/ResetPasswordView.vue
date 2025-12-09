@@ -65,7 +65,7 @@ const route = useRoute();
 const router = useRouter();
 
 const form = ref({
-  token: route.params.token,
+  token: route.query.token,
   email: route.query.email || '',
   password: '',
   password_confirmation: ''
@@ -81,8 +81,7 @@ const handleReset = async () => {
   errorMessage.value = '';
 
   try {
-    await axios.get('/sanctum/csrf-cookie');
-    const res = await axios.post('/reset-password', form.value);
+    const res = await axios.post('/api/reset-password', form.value);
     message.value = res.data.status || 'Password has been reset successfully.';
     setTimeout(() => {
       router.push('/login');
