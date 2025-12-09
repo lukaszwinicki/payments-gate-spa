@@ -71,22 +71,29 @@ const handleLogin = async () => {
   errorMessage.value = "";
 
   try {
-    await axios.get("/sanctum/csrf-cookie");
-
-    await axios.post("/login", {
+    const responseLogin = await axios.post("/api/login", {
       email: email.value,
       password: password.value,
       remember: rememberMe.value,
     });
+
+    localStorage.setItem('token', responseLogin.data.token)
+    axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+
     router.push("/admin");
   } catch (error) {
-    if (error.response.status === 422) {
+    if (!error.response) {
+      errorMessage.value = "Network error. Please try again.";
+    } else if (error.response.status === 422) {
+      errorMessage.value = Object.values(error.response.data.errors || {})
+        .flat()
+        .join(' ') || "Invalid input";
+    } else if (error.response.status === 401) {
       errorMessage.value = "Invalid credentials";
+    } else if (error.response.status === 423) {
+      errorMessage.value = "Account is locked";
     } else {
       errorMessage.value = "An error occurred";
-    }
-    if (error.response.status === 423) {
-      errorMessage.value = "Account is locked";
     }
   } finally {
     isLoading.value = false;

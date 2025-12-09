@@ -79,19 +79,8 @@ const currentPage = computed(() => {
 
 const handleLogout = async () => {
     isLoading.value = true
-
-    try {
-        await axios.get('/sanctum/csrf-cookie', {
-            withCredentials: true
-        })
-        await axios.post('/logout', {}, {
-            withCredentials: true,
-        })
-        router.push('/login')
-    } catch (error) {
-        console.error('Error during logout:', error)
-    } finally {
-        isLoading.value = false
-    }
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
+    router.push('/login');
 }
 </script>

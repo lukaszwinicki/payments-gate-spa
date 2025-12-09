@@ -75,24 +75,29 @@ const message = ref('');
 const errorMessage = ref('');
 
 const handleRegister = async () => {
-  isLoading.value = true;
-  errorMessage.value = "";
+    isLoading.value = true;
+    errorMessage.value = "";
 
-  try {
-    await axios.get("/sanctum/csrf-cookie");
+    try {
+        const registerResponse = await axios.post("/api/register", {
+            name: name.value,
+            email: email.value,
+            password: password.value,
+            password_confirmation: confirmPassword.value,
+        });
 
-    await axios.post("/register", {
-      name: name.value,
-      email: email.value,
-      password: password.value,
-      password_confirmation: confirmPassword.value,
-    });
+        localStorage.setItem('token', registerResponse.data.token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
 
-    router.push("/admin");
-  } catch (error) {
-    errorMessage.value = error.response.data.message;
-  } finally {
-    isLoading.value = false;
-  }
+        router.push("/admin");
+    } catch (error) {
+        if (error.response?.data?.errors) {
+            errorMessage.value = Object.values(error.response.data.errors).flat().join(' ');
+        } else {
+            errorMessage.value = error.response?.data?.message || 'Registration failed';
+        }
+    } finally {
+        isLoading.value = false;
+    }
 }
 </script>

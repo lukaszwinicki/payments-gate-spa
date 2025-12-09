@@ -9,8 +9,6 @@ import axios from 'axios';
 const app = createApp(App)
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
-axios.defaults.withCredentials = true;
-axios.defaults.withXSRFToken = true
 
 app.use(createPinia())
 app.use(router)
