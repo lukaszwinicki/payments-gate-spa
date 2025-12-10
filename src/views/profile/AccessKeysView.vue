@@ -53,9 +53,9 @@ function copyToClipboard(text, type) {
 onMounted(async () => {
     isLoading.value = true;
     try {
-        const { data } = await axios.get('/access-keys');
-        apiKey.value = data.api_key;
-        secretKey.value = data.secret_key;
+        const { data } = await axios.get('/api/access-keys');
+        apiKey.value = data.apiKey;
+        secretKey.value = data.secretKey;
     } finally {
         isLoading.value = false;
     }

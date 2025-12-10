@@ -86,8 +86,8 @@ const handleRegister = async () => {
             password_confirmation: confirmPassword.value,
         });
 
+        localStorage.setItem('token_expiry', registerResponse.data.expiresAt)
         localStorage.setItem('token', registerResponse.data.token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
 
         router.push("/admin");
     } catch (error) {

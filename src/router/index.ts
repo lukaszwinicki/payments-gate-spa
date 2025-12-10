@@ -63,11 +63,20 @@ router.beforeEach(async (to, from, next) => {
   if (!to.meta.requiresAuth) return next()
 
   const token = localStorage.getItem('token')
+  const tokenExpiry = localStorage.getItem('token_expiry')
 
   if (token) {
     if (!axios.defaults.headers.common['Authorization']) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
     }
+
+    if (tokenExpiry && new Date() > new Date(tokenExpiry)) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('token_expiry')
+      delete axios.defaults.headers.common['Authorization']
+      return next('/login')
+    }
+
     next()
   } else {
     next('/login')
