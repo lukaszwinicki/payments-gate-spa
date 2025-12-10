@@ -77,8 +77,8 @@ const handleLogin = async () => {
       remember: rememberMe.value,
     });
 
+    localStorage.setItem('token_expiry', responseLogin.data.expiresAt)
     localStorage.setItem('token', responseLogin.data.token)
-    axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
 
     router.push("/admin");
   } catch (error) {
