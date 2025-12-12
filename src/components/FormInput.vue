@@ -6,7 +6,7 @@
 
     <input :id="id" :type="type" :value="modelValue" :placeholder="placeholder" :required="required"
       @input="$emit('update:modelValue', $event.target.value)"
-      class="border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded w-full px-3 py-2 text-gray-700" />
+      class="border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded w-full px-3 py-2 text-gray-700" />
   </div>
 </template>
 

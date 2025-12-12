@@ -63,13 +63,13 @@ const transactionDetails = computed(() => ({
 }))
 
 function returnToMerchant() {
-  isLoading.value = true
-  if (returnUrl.value) {
-    window.location.href = returnUrl.value;
-  } else {
-    console.warn('No return URL provided')
-    isLoading.value = false
-  }
+    isLoading.value = true
+    if (returnUrl.value) {
+        window.location.href = returnUrl.value;
+    } else {
+        console.warn('No return URL provided')
+        isLoading.value = false
+    }
 }
 
 onMounted(async () => {

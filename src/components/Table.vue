@@ -3,7 +3,7 @@
 
         <div class="flex justify-between items-center mb-4">
             <input v-model="searchQuery" type="text" placeholder="Search..."
-                class="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                class="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-300" />
         </div>
 
         <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
