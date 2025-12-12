@@ -4,7 +4,7 @@
       {{ label }}
     </label>
     <select :id="id" :value="modelValue" @change="$emit('update:modelValue', $event.target.value)"
-      class="border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded w-full px-3 py-2 text-gray-700"
+      class="border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded w-full px-3 py-2 text-gray-700"
       :required="required">
       <option disabled value="">Select a payment method</option>
       <option v-for="method in options" :key="method" :value="method">

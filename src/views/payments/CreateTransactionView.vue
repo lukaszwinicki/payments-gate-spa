@@ -29,11 +29,11 @@
                     placeholder="Enter your return url" required />
             </div>
             <div class="pt-2">
-          <button type="submit"
-            class="w-full bg-slate-500 hover:bg-sky-700 text-white font-semibold py-3 rounded-lg transition-colors duration-200">
-            Create Transaction
-          </button>
-        </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors duration-200">
+                    Create Transaction
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -44,4 +44,5 @@ import FormSelect from '@/components/FormSelect.vue';
 import { PaymentMethod } from '@/enums/PaymentMethod';
 
 const paymentMethods = Object.values(PaymentMethod);
+
 </script>

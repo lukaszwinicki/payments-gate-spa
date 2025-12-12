@@ -52,12 +52,12 @@
             <Section title="Personal Details" :withWrapper="true">
               <FormField label="Full Name">
                 <input v-model="fullname" type="text"
-                  class="border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-3 py-2 w-2/3 text-gray-700"
+                  class="border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded px-3 py-2 w-2/3 text-gray-700"
                   placeholder="Enter your full name" required />
               </FormField>
               <FormField label="Email">
                 <input v-model="email" type="email"
-                  class="border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-3 py-2 w-2/3 text-gray-700"
+                  class="border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded px-3 py-2 w-2/3 text-gray-700"
                   placeholder="Enter your email" required />
               </FormField>
             </Section>
@@ -161,7 +161,7 @@ const getPaymentDetails = async (id: string) => {
     const status = err.status as keyof typeof map
     const message = err.data?.error ?? err.message ?? 'An unexpected error occurred'
     error.value = message
-    
+
     if (status && map[status]) map[status].value = true
   } finally {
     isLoading.value = false
