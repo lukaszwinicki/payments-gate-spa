@@ -11,6 +11,22 @@ export interface PaymentResponse {
     link: string
 }
 
+export interface PaymentLinkRequest {
+    amount: number
+    currency: string,
+    expiresAt: Date,
+    notificationUrl: string,
+    returnUrl: string
+}
+
+export interface PaymentLinkResponse {
+    link: string
+}
+
+export interface PaymentResponse {
+    link: string
+}
+
 export interface PaymentDetailsRequest {
     paymentLinkId: string
 }
