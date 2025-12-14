@@ -1,15 +1,54 @@
-import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentRequest, PaymentResponse, PaymentStatusRequest, PaymentStatusResponse } from '@/types/PaymentsRequests'
+import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentLinkRequest, PaymentLinkResponse, PaymentRequest, PaymentResponse, PaymentStatusRequest, PaymentStatusResponse } from '@/types/PaymentsRequests'
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 
 export class PaymentService {
     constructor(private readonly baseUrl: string) { }
 
     private getHeaders(): HeadersInit {
+        const token = localStorage.getItem('token')
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`
+        }
+
         return headers
+    }
+
+    async createPaymentLink(paymentLinkData: PaymentLinkRequest): Promise<PaymentLinkResponse> {
+        try {
+            const paymentLinkResponse = await fetch(`${this.baseUrl}/api/create-payment-link`, {
+                method: 'POST',
+                headers: this.getHeaders(),
+                body: JSON.stringify(paymentLinkData)
+            })
+
+            const paymentLinkResult = await paymentLinkResponse.json()
+
+            console.log(localStorage.getItem('token'));
+
+            if (!paymentLinkResponse.ok) {
+                const backendMessage =
+                    typeof paymentLinkResult?.error === 'object'
+                        ? Object.values(paymentLinkResult.error).flat().join(' ')
+                        : paymentLinkResult?.error ?? `HTTP ${paymentLinkResult.status}`
+
+                throw new Error(backendMessage)
+            }
+
+            return {
+                link: paymentLinkResult.paymentLink
+            }
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                throw new Error(err.message);
+            } else {
+                throw new Error('Failed to process create payment link. Please try again.')
+            }
+        }
     }
 
     async confirmPaymentLink(paymentData: PaymentRequest): Promise<PaymentResponse> {
