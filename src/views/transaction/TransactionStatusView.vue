@@ -38,8 +38,8 @@
 
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/TransactionStatus'
-import { paymentService } from '@/services/PaymentService';
+import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/transactions/TransactionStatus'
+import { transactionService } from '@/services/transactions/TransactionService';
 import type { TransactionStatus } from '@/enums/TransactionStatus';
 
 const route = useRoute();
@@ -79,7 +79,7 @@ onMounted(async () => {
     }
     try {
         isLoading.value = true
-        const response = await paymentService.getPaymentStatus({ uuid: uuid as string })
+        const response = await transactionService.getPaymentStatus({ uuid: uuid as string })
         status.value = response.status
         amount.value = response.amount
         currency.value = response.currency

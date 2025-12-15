@@ -2,16 +2,28 @@
     <div class="flex justify-center">
         <div class="w-full max-w-3xl space-y-8">
 
-            <div class="bg-white p-6 rounded-lg shadow-md space-y-5">
+            <div class="flex items-center gap-3 mb-6">
+                <div
+                    class="flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-tr from-blue-200 to-blue-400 shadow">
+                    <LinkIcon class="w-6 h-6 text-white" />
+                </div>
+                <h2 class="text-xl font-semibold text-gray-800">
+                    Generate Payment Link
+                </h2>
+            </div>
+
+            <div class="space-y-5">
                 <FormInput v-model="amount" label="Amount" type="number" required />
                 <FormInput v-model="currency" label="Currency" type="text" required />
                 <FormInput v-model="expiresAt" label="Expires at" type="datetime-local" required />
-                <FormInput v-model="notificationUrl" label="Notification url" type="url" required />
-                <FormInput v-model="returnUrl" label="Return url" type="url" required />
+                <FormInput v-model="notificationUrl" label="Notification URL" type="url" required />
+                <FormInput v-model="returnUrl" label="Return URL" type="url" required />
 
                 <button type="button"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
-                    @click="createPaymentLink">
+                    :disabled="isLoading" @click="createPaymentLink">
+                    <span v-if="isLoading"
+                        class="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5 inline-block mr-2"></span>
                     Create Payment Link
                 </button>
             </div>
@@ -41,31 +53,29 @@
 </template>
 
 <script lang="ts" setup>
-import FormInput from '@/components/FormInput.vue';
-import CopyableInput from '@/components/CopyableInput.vue';
-import type { PaymentLinkRequest } from '@/types/PaymentsRequests';
-import { paymentService } from '@/services/PaymentService';
-import { ref } from 'vue';
+import { ref } from 'vue'
 import Swal from 'sweetalert2'
-import {
-    CheckCircleIcon
-} from '@heroicons/vue/24/outline'
+import { CheckCircleIcon, LinkIcon } from '@heroicons/vue/24/outline'
+import FormInput from '@/components/FormInput.vue'
+import CopyableInput from '@/components/CopyableInput.vue'
+import { paymentLinkService } from '@/services/payment-links/PaymentLinkService'
+import type { PaymentLinkRequest } from '@/types/payment-links/PaymentLinkTypes'
 
 const amount = ref<string | null>(null)
 const currency = ref<string | null>(null)
 const expiresAt = ref<Date | null>(null)
 const notificationUrl = ref<string | null>(null)
 const returnUrl = ref<string | null>(null)
-const isLoading = ref(true)
+const isLoading = ref(false)
 const paymentLink = ref<string | null>(null)
 
 const createPaymentLink = async () => {
     const missing = [
-        !amount.value && 'Anount',
+        !amount.value && 'Amount',
         !currency.value && 'Currency',
         !expiresAt.value && 'Expires at',
-        !notificationUrl.value && 'Notification url',
-        !returnUrl.value && 'Return url',
+        !notificationUrl.value && 'Notification URL',
+        !returnUrl.value && 'Return URL',
     ].filter(Boolean)
 
     if (missing.length) {
@@ -78,18 +88,19 @@ const createPaymentLink = async () => {
         return
     }
 
+    isLoading.value = true
+
     try {
         const paymentLinkData: PaymentLinkRequest = {
             amount: Number(amount.value ?? 0),
             currency: currency.value ?? '',
-            expiresAt: expiresAt.value ? new Date(expiresAt.value) : new Date(),
+            expiresAt: expiresAt.value ?? new Date(),
             notificationUrl: notificationUrl.value ?? '',
             returnUrl: returnUrl.value ?? '',
         }
 
-        const getPaymentLink = await paymentService.createPaymentLink(paymentLinkData);
-        paymentLink.value = getPaymentLink.link
-
+        const response = await paymentLinkService.createPaymentLink(paymentLinkData)
+        paymentLink.value = response.link
     } catch (err: any) {
         await Swal.fire({
             icon: 'error',
@@ -97,9 +108,8 @@ const createPaymentLink = async () => {
             text: err.response?.data?.error ?? err.message ?? 'Unknown error',
             confirmButtonColor: '#ef4444',
         })
-    }
-    finally {
-        isLoading.value = false;
+    } finally {
+        isLoading.value = false
     }
 }
 </script>

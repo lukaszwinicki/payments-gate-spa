@@ -1,34 +1,19 @@
-import type { PaymentDetailsRequest, PaymentDetailsResponse, PaymentLinkRequest, PaymentLinkResponse, PaymentRequest, PaymentResponse, PaymentStatusRequest, PaymentStatusResponse } from '@/types/PaymentsRequests'
+import type { PaymentLinkRequest, PaymentLinkResponse, PaymentLinkDetailsRequest, PaymentLinkDetailsResponse, ConfirmPaymentLinkRequest, ConfirmPaymentLinkResponse } from '@/types/payment-links/PaymentLinkTypes'
+import { getAuthHeaders } from '@/lib/http/getAuthHeaders'
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 
-export class PaymentService {
+export class PaymentLinkService {
     constructor(private readonly baseUrl: string) { }
-
-    private getHeaders(): HeadersInit {
-        const token = localStorage.getItem('token')
-        const headers: HeadersInit = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`
-        }
-
-        return headers
-    }
 
     async createPaymentLink(paymentLinkData: PaymentLinkRequest): Promise<PaymentLinkResponse> {
         try {
             const paymentLinkResponse = await fetch(`${this.baseUrl}/api/create-payment-link`, {
                 method: 'POST',
-                headers: this.getHeaders(),
+                headers: getAuthHeaders(),
                 body: JSON.stringify(paymentLinkData)
             })
 
             const paymentLinkResult = await paymentLinkResponse.json()
-
-            console.log(localStorage.getItem('token'));
 
             if (!paymentLinkResponse.ok) {
                 const backendMessage =
@@ -39,7 +24,7 @@ export class PaymentService {
                 throw new Error(backendMessage)
             }
 
-            return {
+            return  {
                 link: paymentLinkResult.paymentLink
             }
         } catch (err: unknown) {
@@ -51,11 +36,11 @@ export class PaymentService {
         }
     }
 
-    async confirmPaymentLink(paymentData: PaymentRequest): Promise<PaymentResponse> {
+    async confirmPaymentLink(paymentData: ConfirmPaymentLinkRequest): Promise<ConfirmPaymentLinkResponse> {
         try {
             const paymentResponse = await fetch(`${this.baseUrl}/api/confirm-payment-link`, {
                 method: 'POST',
-                headers: this.getHeaders(),
+                headers: getAuthHeaders(),
                 body: JSON.stringify(paymentData)
             })
 
@@ -66,7 +51,7 @@ export class PaymentService {
                 throw new Error(backendMessage)
             }
 
-            return paymentResult
+            return paymentResult as ConfirmPaymentLinkResponse
         } catch (err: unknown) {
             if (err instanceof Error) {
                 throw new Error(err.message);
@@ -76,12 +61,12 @@ export class PaymentService {
         }
     }
 
-    async paymentDetails(id: PaymentDetailsRequest): Promise<PaymentDetailsResponse> {
+    async paymentLinkDetails(id: PaymentLinkDetailsRequest): Promise<PaymentLinkDetailsResponse> {
         try {
             const { paymentLinkId } = id;
             const paymentResponse = await fetch(`${this.baseUrl}/api/payment/${paymentLinkId}`, {
                 method: 'GET',
-                headers: this.getHeaders(),
+                headers: getAuthHeaders(),
             })
 
             const paymentResult = await paymentResponse.json()
@@ -89,7 +74,7 @@ export class PaymentService {
             if (!paymentResponse.ok) {
                 throw { status: paymentResponse.status, data: paymentResult };
             }
-            return paymentResult as PaymentDetailsResponse;
+            return paymentResult as PaymentLinkDetailsResponse;
         } catch (err: unknown) {
             if (err instanceof Error) {
                 throw new Error(err.message);
@@ -100,31 +85,6 @@ export class PaymentService {
             }
         }
     }
-
-    async getPaymentStatus(id: PaymentStatusRequest): Promise<PaymentStatusResponse> {
-        const { uuid } = id;
-        try {
-            const paymentStatusResponse = await fetch(`${this.baseUrl}/api/transaction/${uuid}/status`, {
-                method: 'GET',
-                headers: this.getHeaders(),
-            })
-
-            const paymentResult = await paymentStatusResponse.json()
-
-            if (!paymentStatusResponse.ok) {
-                throw { status: paymentStatusResponse.status, data: paymentResult };
-            }
-            return paymentResult as PaymentStatusResponse;
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                throw new Error(err.message);
-            } else if (typeof err === 'object' && err !== null && 'status' in err && 'data' in err) {
-                throw err;
-            } else {
-                throw new Error('Failed to fetch payment status. Please try again.');
-            }
-        }
-    }
 }
 
-export const paymentService = new PaymentService(baseUrl)
+export const paymentLinkService = new PaymentLinkService(baseUrl)

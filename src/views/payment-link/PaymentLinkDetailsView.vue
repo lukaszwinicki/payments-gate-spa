@@ -105,14 +105,14 @@ import PaymentMethodTile from '@/components/PaymentMethodTile.vue'
 import FormField from '@/components/FormField.vue'
 import Section from '@/components/Section.vue'
 import SummaryRow from '@/components/SummaryRow.vue'
-import { paymentService } from '@/services/PaymentService'
+import { paymentLinkService } from '@/services/payment-links/PaymentLinkService'
 import { PaymentMethod } from '@/enums/PaymentMethod'
 import { TransactionStatus } from '@/enums/TransactionStatus'
-import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/TransactionStatus'
-import type { PaymentRequest, PaymentDetailsResponse } from '@/types/PaymentsRequests'
+import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/transactions/TransactionStatus'
+import type { ConfirmPaymentLinkRequest, PaymentLinkDetailsResponse } from '@/types/payment-links/PaymentLinkTypes'
 
 const route = useRoute()
-const payment = ref<PaymentDetailsResponse | null>(null)
+const payment = ref<PaymentLinkDetailsResponse | null>(null)
 const transaction = computed(() => payment.value?.transaction ?? null)
 const fullname = ref('')
 const email = ref('')
@@ -147,7 +147,7 @@ function returnToMerchant() {
 const getPaymentDetails = async (id: string) => {
   try {
     isLoading.value = true
-    const response = await paymentService.paymentDetails({ paymentLinkId: id })
+    const response = await paymentLinkService.paymentLinkDetails({ paymentLinkId: id })
 
     payment.value = response
     isPaid.value = !!transaction.value
@@ -204,7 +204,7 @@ const createTransaction = async () => {
   }
 
   try {
-    const paymentData: PaymentRequest = {
+    const paymentData: ConfirmPaymentLinkRequest = {
       paymentLinkId: route.params.payment_link_id as string,
       amount: Number(payment.value?.payment.amount ?? 0),
       currency: payment.value?.payment.currency ?? '',
@@ -213,7 +213,7 @@ const createTransaction = async () => {
       email: email.value,
     }
 
-    const { link } = await paymentService.confirmPaymentLink(paymentData)
+    const { link } = await paymentLinkService.confirmPaymentLink(paymentData)
 
     if (link) {
       redirectToProvider.value = true
