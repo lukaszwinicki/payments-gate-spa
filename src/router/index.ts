@@ -1,26 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import axios from 'axios'
-import TransactionsView from '@/views/payments/TransactionsView.vue'
-import PaymentDetailsView from '@/views/payment-link/PaymentDetailsView.vue'
-import PaymentStatusView from '@/views/payments/PaymentStatusView.vue'
+
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import LoginView from '@/views/auth/LoginView.vue'
-import ForgotPasswordView from '@/views/auth/ForgotPasswordView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
+import ForgotPasswordView from '@/views/auth/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/auth/ResetPasswordView.vue'
-import CreateTransactionView from '@/views/payments/CreateTransactionView.vue'
+import TransactionsView from '@/views/transaction/TransactionsView.vue'
+import CreateTransactionView from '@/views/transaction/CreateTransactionView.vue'
+import TransactionStatusView from '@/views/transaction/TransactionStatusView.vue'
+import TransactionRefundsView from '@/views/transaction/TransactionRefundsView.vue'
+import PaymentLinkDetailsView from '@/views/payment-link/PaymentLinkDetailsView.vue'
 import CreatePaymentLinkView from '@/views/payment-link/CreatePaymentLinkView.vue'
-import PaymentRefundsView from '@/views/payments/PaymentRefundsView.vue'
-import AccessKeysView from '@/views/profile/AccessKeysView.vue'
+import ApiCredentialsView from '@/views/profile/ApiCredentialsView.vue'
 
 const routes = [
   {
     path: '/payment/:payment_link_id',
-    component: PaymentDetailsView
+    component: PaymentLinkDetailsView
   },
   {
     path: '/payment-status',
-    component: PaymentStatusView
+    component: TransactionStatusView
   },
   {
     path: '/login',
@@ -48,8 +49,8 @@ const routes = [
       { path: 'transactions', component: TransactionsView },
       { path: 'create-transaction', component: CreateTransactionView },
       { path: 'create-payment-link', component: CreatePaymentLinkView },
-      { path: 'payment-refunds', component: PaymentRefundsView },
-      { path: 'access-keys', component: AccessKeysView },
+      { path: 'payment-refunds', component: TransactionRefundsView },
+      { path: 'api-credentials', component: ApiCredentialsView },
     ]
   }
 ]

@@ -22,10 +22,7 @@
             </div>
         </aside>
         <div class="flex-1 ml-64 min-h-screen flex flex-col">
-            <header class="bg-white shadow-sm border-b border-gray-100 px-6 py-5 flex justify-between items-center">
-                <div class="text-2xl font-bold text-gray-800 mb-2">
-                    {{ currentPage }}
-                </div>
+            <header class="bg-white shadow-sm border-b border-gray-100 px-6 py-5 flex justify-end items-center">
                 <div class="flex items-center gap-4">
                     <div class="text-sm text-gray-600">
                         Hello, <span class="font-semibold">{{ user.name }}</span>
@@ -50,13 +47,12 @@ import {
     ServerIcon,
     ReceiptRefundIcon,
     KeyIcon,
-    BanknotesIcon
+    BanknotesIcon,
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const router = useRouter()
 const isLoading = ref(false)
-
 
 const user = {
     name: 'Admin User',
@@ -69,7 +65,7 @@ const navigationLinks = [
     { name: 'Create Transaction', to: '/admin/create-transaction', icon: ServerIcon },
     { name: 'Create Payment Link', to: '/admin/create-payment-link', icon: LinkIcon },
     { name: 'Payment Refunds', to: '/admin/payment-refunds', icon: ReceiptRefundIcon },
-    { name: 'Access Keys', to: '/admin/access-keys', icon: KeyIcon }
+    { name: 'API Credentials', to: '/admin/api-credentials', icon: KeyIcon }
 ]
 
 const currentPage = computed(() => {

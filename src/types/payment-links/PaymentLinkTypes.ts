@@ -1,16 +1,3 @@
-export interface PaymentRequest {
-    paymentLinkId: string
-    amount: number
-    currency: string
-    paymentMethod: string
-    fullname: string
-    email: string
-}
-
-export interface PaymentResponse {
-    link: string
-}
-
 export interface PaymentLinkRequest {
     amount: number
     currency: string,
@@ -23,11 +10,7 @@ export interface PaymentLinkResponse {
     link: string
 }
 
-export interface PaymentResponse {
-    link: string
-}
-
-export interface PaymentDetailsRequest {
+export interface PaymentLinkDetailsRequest {
     paymentLinkId: string
 }
 
@@ -39,7 +22,7 @@ export interface TransactionDetails {
     returnUrl: string
 }
 
-export interface PaymentDetailsResponse {
+export interface PaymentLinkDetailsResponse {
     payment: {
         paymentLinkId: string
         amount: string
@@ -48,14 +31,15 @@ export interface PaymentDetailsResponse {
     transaction: TransactionDetails | null
 }
 
-export interface PaymentStatusRequest {
-    uuid: string
-}
-
-export interface PaymentStatusResponse {
-    status: string
-    amount: string
+export interface ConfirmPaymentLinkRequest {
+    paymentLinkId: string
+    amount: number
     currency: string
     paymentMethod: string
-    returnUrl: string
+    fullname: string
+    email: string
+}
+
+export interface ConfirmPaymentLinkResponse {
+    link: string
 }
