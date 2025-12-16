@@ -9,7 +9,7 @@ import ResetPasswordView from '@/views/auth/ResetPasswordView.vue'
 import TransactionsView from '@/views/transaction/TransactionsView.vue'
 import CreateTransactionView from '@/views/transaction/CreateTransactionView.vue'
 import TransactionStatusView from '@/views/transaction/TransactionStatusView.vue'
-import TransactionRefundsView from '@/views/transaction/TransactionRefundsView.vue'
+import RefundTransactionView from '@/views/transaction/RefundTransactionView.vue'
 import PaymentLinkDetailsView from '@/views/payment-link/PaymentLinkDetailsView.vue'
 import CreatePaymentLinkView from '@/views/payment-link/CreatePaymentLinkView.vue'
 import ApiCredentialsView from '@/views/profile/ApiCredentialsView.vue'
@@ -49,7 +49,7 @@ const routes = [
       { path: 'transactions', component: TransactionsView },
       { path: 'create-transaction', component: CreateTransactionView },
       { path: 'create-payment-link', component: CreatePaymentLinkView },
-      { path: 'payment-refunds', component: TransactionRefundsView },
+      { path: 'payment-refunds', component: RefundTransactionView },
       { path: 'api-credentials', component: ApiCredentialsView },
     ]
   }
