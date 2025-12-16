@@ -1,4 +1,4 @@
-import type { TransactionStatusRequest, TransactionStatusResponse } from '@/types/transactions/TransactionTypes'
+import type { CreateTransactionRequest, CreateTransactionResponse, RefundTransactionRequest, RefundTransactionResponse, TransactionStatusRequest, TransactionStatusResponse } from '@/types/transactions/TransactionTypes'
 import { getAuthHeaders } from '@/lib/http/getAuthHeaders'
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -26,6 +26,67 @@ export class TransactionService {
                 throw err;
             } else {
                 throw new Error('Failed to fetch payment status. Please try again.');
+            }
+        }
+    }
+
+    async createTransaction(paymentData: CreateTransactionRequest): Promise<CreateTransactionResponse> {
+        try {
+            const createTransactionResponse = await fetch(`${this.baseUrl}/api/create-transaction`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(paymentData)
+            })
+
+            const paymentResult = await createTransactionResponse.json()
+
+            if (!createTransactionResponse.ok) {
+                const backendMessage =
+                    typeof paymentResult?.error === 'object'
+                        ? Object.values(paymentResult.error).flat().join(' ')
+                        : paymentResult?.error ?? `HTTP ${paymentResult.status}`
+
+                throw new Error(backendMessage)
+            }
+            return paymentResult as CreateTransactionResponse
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                throw new Error(err.message);
+            } else if (typeof err === 'object' && err !== null && 'status' in err && 'data' in err) {
+                throw err;
+            } else {
+                throw new Error('Failed to create payment. Please try again.');
+            }
+        }
+    }
+
+    async refundTransaction(transactionUuid: RefundTransactionRequest): Promise<RefundTransactionResponse> {
+        try {
+            const refundTransactionResponse = await fetch(`${this.baseUrl}/api/refund`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(transactionUuid)
+            })
+
+            const refundTransactonResult = await refundTransactionResponse.json()
+
+            if (!refundTransactionResponse.ok) {
+                const backendMessage =
+                    typeof refundTransactonResult?.error === 'object'
+                        ? Object.values(refundTransactonResult.error).flat().join(' ')
+                        : refundTransactonResult?.error ?? `HTTP ${refundTransactonResult.status}`
+
+                throw new Error(backendMessage)
+            }
+            return refundTransactonResult as RefundTransactionResponse
+        }
+        catch (err: unknown) {
+            if (err instanceof Error) {
+                throw new Error(err.message);
+            } else if (typeof err === 'object' && err !== null && 'status' in err && 'data' in err) {
+                throw err;
+            } else {
+                throw new Error('Failed to refund payment. Please try again.');
             }
         }
     }

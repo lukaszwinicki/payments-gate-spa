@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative w-full">
     <label class="block text-sm font-medium text-gray-600 mb-2">
       {{ label }}
     </label>
@@ -7,7 +7,7 @@
     <input type="text" :value="value" readonly @click="copyToClipboard" class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 cursor-pointer
              focus:outline-none focus:ring-2 focus:ring-blue-400" />
 
-    <span v-if="copied" class="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 text-sm font-medium">
+    <span v-if="copied" class="absolute right-2 -bottom-2 text-green-600 text-sm font-medium">
       Copied!
     </span>
 
