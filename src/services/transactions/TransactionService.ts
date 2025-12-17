@@ -1,4 +1,12 @@
-import type { CreateTransactionRequest, CreateTransactionResponse, RefundTransactionRequest, RefundTransactionResponse, TransactionStatusRequest, TransactionStatusResponse } from '@/types/transactions/TransactionTypes'
+import type {
+    CreateTransactionRequest,
+    CreateTransactionResponse,
+    RefundTransactionRequest,
+    RefundTransactionResponse,
+    TransactionList,
+    TransactionStatusRequest,
+    TransactionStatusResponse
+} from '@/types/transactions/TransactionTypes'
 import { getAuthHeaders } from '@/lib/http/getAuthHeaders'
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -87,6 +95,37 @@ export class TransactionService {
                 throw err;
             } else {
                 throw new Error('Failed to refund payment. Please try again.');
+            }
+        }
+    }
+
+    async getTransctionsList(): Promise<TransactionList> {
+        try {
+            
+            const transactionListResponse = await fetch(`${this.baseUrl}/api/transactions`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            })
+            
+            const transactionListResult = await transactionListResponse.json()
+
+            if (!transactionListResponse.ok) {
+                const backendMessage =
+                    typeof transactionListResult?.error === 'object'
+                        ? Object.values(transactionListResult.error).flat().join(' ')
+                        : transactionListResult?.error ?? `HTTP ${transactionListResult.status}`
+
+                throw new Error(backendMessage)
+            }
+            return transactionListResult as TransactionList           
+        }
+        catch (err: unknown) {
+            if (err instanceof Error) {
+                throw new Error(err.message);
+            } else if (typeof err === 'object' && err !== null && 'status' in err && 'data' in err) {
+                throw err;
+            } else {
+                throw new Error('Failed to list transactions. Please try again.');
             }
         }
     }

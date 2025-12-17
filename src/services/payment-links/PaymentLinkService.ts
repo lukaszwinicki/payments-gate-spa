@@ -1,4 +1,11 @@
-import type { PaymentLinkRequest, PaymentLinkResponse, PaymentLinkDetailsRequest, PaymentLinkDetailsResponse, ConfirmPaymentLinkRequest, ConfirmPaymentLinkResponse } from '@/types/payment-links/PaymentLinkTypes'
+import type {
+    PaymentLinkRequest,
+    PaymentLinkResponse,
+    PaymentLinkDetailsRequest,
+    PaymentLinkDetailsResponse,
+    ConfirmPaymentLinkRequest,
+    ConfirmPaymentLinkResponse
+} from '@/types/payment-links/PaymentLinkTypes'
 import { getAuthHeaders } from '@/lib/http/getAuthHeaders'
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -24,7 +31,7 @@ export class PaymentLinkService {
                 throw new Error(backendMessage)
             }
 
-            return  {
+            return {
                 link: paymentLinkResult.paymentLink
             }
         } catch (err: unknown) {
