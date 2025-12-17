@@ -24,31 +24,22 @@
                             </div>
                         </th>
 
-                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase">
-                            Actions
-                        </th>
                     </tr>
                 </thead>
 
                 <tbody class="bg-white divide-y divide-gray-100">
 
                     <tr v-for="(row, index) in paginatedData" :key="index" class="hover:bg-blue-50 transition">
-
                         <td v-for="(value, key) in row" :key="key" class="px-6 py-4 text-sm text-gray-800">
-                            {{ value }}
+                            <span v-if="key === 'Status'" :class="value.class">
+                                {{ value.text }}
+                            </span>
+                            <span v-else>{{ value }}</span>
                         </td>
-
-                        <td class="px-6 py-4 text-right">
-                            <button class="text-gray-600 hover:text-blue-500 transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5" />
-                                </svg>
-                            </button>
-                        </td>
+                        <div class="flex justify-left items-center">
+                            <slot name="row-actions" :row="row"></slot>
+                        </div>
                     </tr>
-
                     <tr v-if="paginatedData.length === 0">
                         <td :colspan="props.headers.length + 1" class="text-center py-6 text-gray-500 text-sm">
                             No results found
@@ -96,7 +87,7 @@
     </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed } from 'vue'
 
 const props = defineProps({
@@ -106,26 +97,25 @@ const props = defineProps({
 })
 
 const searchQuery = ref('')
+
 const filteredData = computed(() => {
     if (!searchQuery.value) return props.data
-
     const q = searchQuery.value.toLowerCase()
-    return props.data.filter(row =>
-        Object.values(row).some(val =>
+    return (props.data ?? []).filter(row =>
+        row && typeof row === 'object' && Object.values(row as object).some(val =>
             String(val).toLowerCase().includes(q)
         )
     )
 })
 
 const sortColumn = ref(null)
-const sortDirection = ref('asc')
+const sortDirection = ref<'asc' | 'desc'>('asc')
 
-function sortBy(column) {
+function sortBy(column: string) {
     sortDirection.value =
         sortColumn.value === column && sortDirection.value === 'asc'
             ? 'desc'
             : 'asc'
-
     sortColumn.value = column
 }
 
