@@ -1,9 +1,10 @@
 <template>
-  <div class="p-6">
+  <div class="relative p-6">
     <Table :headers="['ID', 'UUID', 'Full name', 'Email', 'Status', 'More']" :data="transactions" :perPage="10">
       <template #row-actions="{ row }">
         <td class="px-6 py-2 text-right">
-          <button class="text-gray-600 hover:text-blue-500 transition">
+          <button @click="openDetails(row.UUID)" class="text-gray-600 hover:text-blue-500 transition inline-flex"
+            aria-label="Show transaction details">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round"
@@ -13,10 +14,21 @@
         </td>
       </template>
     </Table>
-  </div>
-  <div v-if="isLoading"
-    class="absolute inset-0 z-20 flex items-center justify-center bg-white/40 backdrop-blur-sm rounded-xl">
-    <div class="w-10 h-10 border-4 border-blue-500/40 border-t-blue-500 rounded-full animate-spin"></div>
+
+    <div v-if="isLoading"
+      class="absolute inset-0 z-20 flex items-center justify-center bg-white/40 backdrop-blur-sm rounded-xl">
+      <div class="w-10 h-10 border-4 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
+    </div>
+
+    <transition name="fade">
+      <div v-if="$route.name === 'transaction-details'" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" @click="closeModal" />
+
+        <div class="relative z-10 w-full max-w-2xl">
+          <router-view />
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -27,17 +39,43 @@ import { STATUS_STYLES, TransactionStatus } from '@/enums/TransactionStatus';
 import Swal from 'sweetalert2'
 import { ref, onMounted } from 'vue'
 import type { TransactionList } from '@/types/transactions/TransactionTypes';
+import { useRouter } from 'vue-router'
+import { useTransactionsStore } from '@/stores/Transactions';
 
+const router = useRouter()
 const isLoading = ref(false)
-const transactions = ref([])
+const transactionsRaw = ref<TransactionList>([] as unknown as TransactionList)
+const transactions = ref<any[]>([])
+const store = useTransactionsStore()
+onMounted(() => {
+  if (Array.isArray(store.transactionsRaw) && !store.transactionsRaw.length) {
+    store.fetchTransactions();
+  }
+})
+
+const openDetails = (uuid: string) => {
+  const transaction = Array.isArray(transactionsRaw.value)
+    ? transactionsRaw.value.find((t: any) => t.transactionUuid === uuid)
+    : null;
+
+  if (!transaction) return
+
+  router.push({
+    name: 'transaction-details',
+    params: { transactionUuid: uuid },
+  })
+}
+
+const closeModal = () => {
+  router.back()
+}
 
 onMounted(async () => {
   isLoading.value = true;
   try {
     const transactionsList = await transactionService.getTransctionsList();
-    const TableData: TransactionList = transactionsList
-
-    transactions.value = TableData.map(t => ({
+    transactionsRaw.value = transactionsList
+    transactions.value = transactionsList.map(t => ({
       ID: t.id,
       UUID: t.transactionUuid,
       'Full name': t.fullname,

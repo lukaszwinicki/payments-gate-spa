@@ -25,20 +25,25 @@ export interface CreateTransactionResponse {
     transactionUuid: string
 }
 
-export interface TransactionList {
-    transactionUuid: string,
-    transactionId: string,
-    refundCode: string,
-    amount: number,
-    name: string,
-    email: string,
-    currency: string,
-    status: string,
-    notificationId: string,
-    returnUrl: string,
-    paymentMethod: string,
-    createdAt: Date
+export interface Transaction {
+    id: string,
+    transactionUuid: string
+    transactionId: string
+    refundCode: string | null
+    amount: number
+    fullname: string
+    email: string
+    currency: string
+    status: string
+    notificationUrl: string
+    returnUrl: string
+    paymentMethod: string
+    createdAt: string
+    updatedAt?: string
 }
+
+export type TransactionList = Transaction[]
 
 export type RefundTransactionRequest = { transactionUuid: string };
 export type RefundTransactionResponse = { transactionUuid: string };
+
