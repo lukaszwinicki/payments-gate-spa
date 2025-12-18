@@ -13,6 +13,7 @@ import RefundTransactionView from '@/views/transaction/RefundTransactionView.vue
 import PaymentLinkDetailsView from '@/views/payment-link/PaymentLinkDetailsView.vue'
 import CreatePaymentLinkView from '@/views/payment-link/CreatePaymentLinkView.vue'
 import ApiCredentialsView from '@/views/profile/ApiCredentialsView.vue'
+import TransactionDetailsView from '@/views/transaction/TransactionDetailsView.vue'
 
 const routes = [
   {
@@ -46,7 +47,18 @@ const routes = [
     component: AdminLayout,
     meta: { requiresAuth: true },
     children: [
-      { path: 'transactions', component: TransactionsView },
+      {
+        path: 'transactions',
+        component: TransactionsView,
+        children: [
+          {
+            path: ':transactionUuid',
+            name: 'transaction-details',
+            component: TransactionDetailsView,
+            props: true
+          }
+        ]
+      },
       { path: 'create-transaction', component: CreateTransactionView },
       { path: 'create-payment-link', component: CreatePaymentLinkView },
       { path: 'payment-refunds', component: RefundTransactionView },

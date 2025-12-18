@@ -11,10 +11,9 @@
 
                 <thead class="bg-gray-50">
                     <tr>
-                        <th v-for="(header, index) in props.headers" :key="index" @click="sortBy(header)" class="px-6 py-4 text-left text-xs font-semibold 
+                        <th v-for="(header, index) in props.headers" :key="index" @click="sortBy(String(header))" class="px-6 py-4 text-left text-xs font-semibold 
                                    text-gray-700 uppercase tracking-wide cursor-pointer
                                    hover:text-blue-600 transition select-none">
-
                             <div class="flex items-center gap-1">
                                 <span>{{ header }}</span>
 
@@ -23,36 +22,38 @@
                                 </span>
                             </div>
                         </th>
-
                     </tr>
                 </thead>
 
                 <tbody class="bg-white divide-y divide-gray-100">
-
                     <tr v-for="(row, index) in paginatedData" :key="index" class="hover:bg-blue-50 transition">
-                        <td v-for="(value, key) in row" :key="key" class="px-6 py-4 text-sm text-gray-800">
-                            <span v-if="key === 'Status'" :class="value.class">
-                                {{ value.text }}
-                            </span>
-                            <span v-else>{{ value }}</span>
+                        <td v-for="(key, i) in Object.keys(row)" :key="key" class="px-6 py-4 text-sm text-gray-800">
+                            <template
+                                v-if="key === 'Status' && typeof row[key] === 'object' && row[key] !== null && 'class' in row[key] && 'text' in row[key]">
+                                <span :class="row[key].class">
+                                    {{ row[key].text }}
+                                </span>
+                            </template>
+                            <template v-else>
+                                {{ row[key] }}
+                            </template>
                         </td>
                         <div class="flex justify-left items-center">
                             <slot name="row-actions" :row="row"></slot>
                         </div>
                     </tr>
                     <tr v-if="paginatedData.length === 0">
-                        <td :colspan="props.headers.length + 1" class="text-center py-6 text-gray-500 text-sm">
+                        <td :colspan="(props.headers?.length ?? 0) + 1" class="text-center py-6 text-gray-500 text-sm">
                             No results found
                         </td>
                     </tr>
-
                 </tbody>
             </table>
         </div>
 
         <div class="flex justify-between items-center mt-6">
             <p class="text-sm text-gray-500">
-                Showing {{ paginatedData.length }} of {{ sortedData.length }} results
+                Showing {{ paginatedData.length }} of {{ sortedData?.length ?? 0 }} results
             </p>
 
             <div class="flex items-center gap-3">
@@ -66,8 +67,9 @@
                 </button>
 
                 <div class="flex items-center gap-2">
-                    <button v-for="page in visiblePages" :key="page + '-p'" @click="page !== '...' && goToPage(page)"
-                        :disabled="page === '...'" class="px-4 py-2 rounded-md border text-sm" :class="page === currentPage
+                    <button v-for="page in visiblePages" :key="page + '-p'"
+                        @click="page !== '...' && goToPage(Number(page))" :disabled="page === '...'"
+                        class="px-4 py-2 rounded-md border text-sm" :class="page === currentPage
                             ? 'bg-blue-100 text-gray-700 border-blue-300'
                             : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'">
                         {{ page }}
@@ -98,17 +100,23 @@ const props = defineProps({
 
 const searchQuery = ref('')
 
-const filteredData = computed(() => {
+const filteredData = computed<any[]>(() => {
+    if (!props.data) return []
+
     if (!searchQuery.value) return props.data
+
     const q = searchQuery.value.toLowerCase()
-    return (props.data ?? []).filter(row =>
-        row && typeof row === 'object' && Object.values(row as object).some(val =>
+
+    return props.data.filter(row =>
+        row &&
+        typeof row === 'object' &&
+        Object.values(row).some(val =>
             String(val).toLowerCase().includes(q)
         )
     )
 })
 
-const sortColumn = ref(null)
+const sortColumn = ref<string | null>(null)
 const sortDirection = ref<'asc' | 'desc'>('asc')
 
 function sortBy(column: string) {
@@ -119,12 +127,14 @@ function sortBy(column: string) {
     sortColumn.value = column
 }
 
-const sortedData = computed(() => {
+const sortedData = computed<any[]>(() => {
     if (!sortColumn.value) return filteredData.value
 
     return [...filteredData.value].sort((a, b) => {
-        let x = a[sortColumn.value]
-        let y = b[sortColumn.value]
+        const key = sortColumn.value as string
+
+        let x = a[key]
+        let y = b[key]
 
         x = typeof x === 'string' ? x.toLowerCase() : x
         y = typeof y === 'string' ? y.toLowerCase() : y
@@ -136,21 +146,23 @@ const sortedData = computed(() => {
 
 const currentPage = ref(1)
 const totalPages = computed(() =>
-    Math.ceil(sortedData.value.length / props.perPage)
+    Math.ceil((sortedData.value?.length ?? 0) / (props.perPage ?? 1))
 )
 
 const paginatedData = computed(() => {
-    const start = (currentPage.value - 1) * props.perPage
-    return sortedData.value.slice(start, start + props.perPage)
+    const start = (currentPage.value - 1) * (props.perPage ?? 1)
+    const data = sortedData.value ?? []
+    return data.slice(start, start + (props.perPage ?? 1))
 })
 
 function nextPage() {
     if (currentPage.value < totalPages.value) currentPage.value++
 }
+
 function prevPage() {
     if (currentPage.value > 1) currentPage.value--
 }
-function goToPage(page) {
+function goToPage(page: number) {
     currentPage.value = page
 }
 
