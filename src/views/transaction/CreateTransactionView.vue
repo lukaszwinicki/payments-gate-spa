@@ -2,17 +2,7 @@
     <div class="flex justify-center">
         <div class="w-full max-w-3xl space-y-8">
             <div class="bg-white p-6 rounded-lg shadow-md space-y-5">
-
-                <div class="flex items-center gap-3 mb-6">
-                    <div
-                        class="flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-tr from-blue-200 to-blue-400 shadow">
-                        <PlusIcon class="w-6 h-6 text-white" />
-                    </div>
-                    <h2 class="text-xl font-semibold text-gray-800">
-                        Create Transaction
-                    </h2>
-                </div>
-
+                <PageHeader title="Create transaction" :icon="PlusIcon" />
                 <div class="space-y-5">
                     <FormInput v-model=fullname label="Full name" id="fullname" type="text"
                         placeholder="Enter your full name" required />
@@ -74,6 +64,7 @@ import { ref } from 'vue'
 import Swal from 'sweetalert2'
 import type { CreateTransactionRequest } from '@/types/transactions/TransactionTypes';
 import { transactionService } from '@/services/transactions/TransactionService';
+import PageHeader from '@/components/PageHeader.vue';
 
 const fullname = ref<string | null>(null)
 const email = ref<string | null>(null)

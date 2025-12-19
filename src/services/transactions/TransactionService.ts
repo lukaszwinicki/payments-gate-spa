@@ -8,6 +8,9 @@ import type {
     TransactionStatusResponse
 } from '@/types/transactions/TransactionTypes'
 import { getAuthHeaders } from '@/lib/http/getAuthHeaders'
+import type { NotificationList } from '@/types/transactions/NotificationTypes';
+import type { ApiCredentials } from '@/types/transactions/ApiCredentialsTypes';
+
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 
 export class TransactionService {
@@ -101,12 +104,11 @@ export class TransactionService {
 
     async getTransctionsList(): Promise<TransactionList> {
         try {
-            
             const transactionListResponse = await fetch(`${this.baseUrl}/api/transactions`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
             })
-            
+
             const transactionListResult = await transactionListResponse.json()
 
             if (!transactionListResponse.ok) {
@@ -117,7 +119,7 @@ export class TransactionService {
 
                 throw new Error(backendMessage)
             }
-            return transactionListResult as TransactionList           
+            return transactionListResult as TransactionList
         }
         catch (err: unknown) {
             if (err instanceof Error) {
@@ -129,6 +131,64 @@ export class TransactionService {
             }
         }
     }
-}
 
+    async getNotificationList(): Promise<NotificationList> {
+        try {
+            const notificationListResponse = await fetch(`${this.baseUrl}/api/notifications`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            })
+            const notificationListResult = await notificationListResponse.json()
+
+            if (!notificationListResponse.ok) {
+                const backendMessage =
+                    typeof notificationListResult?.error === 'object'
+                        ? Object.values(notificationListResult.error).flat().join(' ')
+                        : notificationListResult?.error ?? `HTTP ${notificationListResult.status}`
+
+                throw new Error(backendMessage)
+            }
+            return notificationListResult as NotificationList
+        }
+        catch (err: unknown) {
+            if (err instanceof Error) {
+                throw new Error(err.message);
+            } else if (typeof err === 'object' && err !== null && 'status' in err && 'data' in err) {
+                throw err;
+            } else {
+                throw new Error('Failed to list notifications. Please try again.');
+            }
+        }
+    }
+
+    async getApiCredentials(): Promise<ApiCredentials> {
+        try {
+            const apiCredentialsResponse = await fetch(`${this.baseUrl}/api/api-credentials`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            })
+            const apiCredentialsResult = await apiCredentialsResponse.json()
+
+            if (!apiCredentialsResponse.ok) {
+                const backendMessage =
+                    typeof apiCredentialsResult?.error === 'object'
+                        ? Object.values(apiCredentialsResult.error).flat().join(' ')
+                        : apiCredentialsResult?.error ?? `HTTP ${apiCredentialsResult.status}`
+
+                throw new Error(backendMessage)
+            }
+            return apiCredentialsResult as ApiCredentials
+        }
+        catch (err: unknown) {
+            if (err instanceof Error) {
+                throw new Error(err.message);
+            } else if (typeof err === 'object' && err !== null && 'status' in err && 'data' in err) {
+                throw err;
+            } else {
+                throw new Error('Failed get api credentials. Please try again.');
+            }
+        }
+    }
+
+}
 export const transactionService = new TransactionService(baseUrl)

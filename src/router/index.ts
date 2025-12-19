@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import axios from 'axios'
-
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
@@ -14,6 +12,7 @@ import PaymentLinkDetailsView from '@/views/payment-link/PaymentLinkDetailsView.
 import CreatePaymentLinkView from '@/views/payment-link/CreatePaymentLinkView.vue'
 import ApiCredentialsView from '@/views/profile/ApiCredentialsView.vue'
 import TransactionDetailsView from '@/views/transaction/TransactionDetailsView.vue'
+import NotificationsView from '@/views/transaction/NotificationsView.vue'
 
 const routes = [
   {
@@ -47,6 +46,9 @@ const routes = [
     component: AdminLayout,
     meta: { requiresAuth: true },
     children: [
+      { path: 'create-transaction', component: CreateTransactionView },
+      { path: 'create-payment-link', component: CreatePaymentLinkView },
+      { path: 'payment-refunds', component: RefundTransactionView },
       {
         path: 'transactions',
         component: TransactionsView,
@@ -59,9 +61,7 @@ const routes = [
           }
         ]
       },
-      { path: 'create-transaction', component: CreateTransactionView },
-      { path: 'create-payment-link', component: CreatePaymentLinkView },
-      { path: 'payment-refunds', component: RefundTransactionView },
+      { path: 'notifications', component: NotificationsView },
       { path: 'api-credentials', component: ApiCredentialsView },
     ]
   }
@@ -79,17 +79,11 @@ router.beforeEach(async (to, from, next) => {
   const tokenExpiry = localStorage.getItem('token_expiry')
 
   if (token) {
-    if (!axios.defaults.headers.common['Authorization']) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-    }
-
     if (tokenExpiry && new Date() > new Date(tokenExpiry)) {
       localStorage.removeItem('token')
       localStorage.removeItem('token_expiry')
-      delete axios.defaults.headers.common['Authorization']
       return next('/login')
     }
-
     next()
   } else {
     next('/login')

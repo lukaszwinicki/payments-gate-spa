@@ -1,92 +1,94 @@
 <template>
-    <div class="bg-white shadow-md rounded-lg p-6">
 
-        <div class="flex justify-between items-center mb-4">
-            <input v-model="searchQuery" type="text" placeholder="Search..."
-                class="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-300" />
-        </div>
 
-        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-            <table class="min-w-full divide-y divide-gray-200">
+    <div class="flex justify-between items-center mb-4">
+        <input v-model="searchQuery" type="text" placeholder="Search..."
+            class="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-300" />
+    </div>
 
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th v-for="(header, index) in props.headers" :key="index" @click="sortBy(String(header))" class="px-6 py-4 text-left text-xs font-semibold 
+    <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+        <table class="min-w-full divide-y divide-gray-200">
+
+            <thead class="bg-gray-50">
+                <tr>
+                    <th v-for="(header, index) in props.headers" :key="index" @click="sortBy(String(header))" class="px-6 py-4 text-left text-xs font-semibold 
                                    text-gray-700 uppercase tracking-wide cursor-pointer
                                    hover:text-blue-600 transition select-none">
-                            <div class="flex items-center gap-1">
-                                <span>{{ header }}</span>
+                        <div class="flex items-center gap-1">
+                            <span>{{ header }}</span>
 
-                                <span v-if="sortColumn === header" class="text-blue-600">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-
-                <tbody class="bg-white divide-y divide-gray-100">
-                    <tr v-for="(row, index) in paginatedData" :key="index" class="hover:bg-blue-50 transition">
-                        <td v-for="(key, i) in Object.keys(row)" :key="key" class="px-6 py-4 text-sm text-gray-800">
-                            <template
-                                v-if="key === 'Status' && typeof row[key] === 'object' && row[key] !== null && 'class' in row[key] && 'text' in row[key]">
-                                <span :class="row[key].class">
-                                    {{ row[key].text }}
-                                </span>
-                            </template>
-                            <template v-else>
-                                {{ row[key] }}
-                            </template>
-                        </td>
-                        <div class="flex justify-left items-center">
-                            <slot name="row-actions" :row="row"></slot>
+                            <span v-if="sortColumn === header" class="text-blue-600">
+                                {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                            </span>
                         </div>
-                    </tr>
-                    <tr v-if="paginatedData.length === 0">
-                        <td :colspan="(props.headers?.length ?? 0) + 1" class="text-center py-6 text-gray-500 text-sm">
-                            No results found
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                    </th>
+                </tr>
+            </thead>
 
-        <div class="flex justify-between items-center mt-6">
-            <p class="text-sm text-gray-500">
-                Showing {{ paginatedData.length }} of {{ sortedData?.length ?? 0 }} results
-            </p>
+            <tbody class="bg-white divide-y divide-gray-100">
+                <tr v-for="(row, index) in paginatedData" :key="index" class="hover:bg-blue-50 transition">
+                    <td v-for="(key, i) in Object.keys(row)" :key="key" class="px-6 py-4 text-sm text-gray-800">
+                        <template v-if="typeof row[key] === 'object'
+                            && row[key] !== null
+                            && 'class' in row[key]
+                            && 'text' in row[key]">
+                            <span :class="row[key].class">
+                                {{ row[key].text }}
+                            </span>
+                        </template>
+                        <template v-else>
+                            {{ row[key] }}
+                        </template>
+                    </td>
+                    <div class="flex justify-left items-center">
+                        <slot name="row-actions" :row="row"></slot>
+                    </div>
+                </tr>
+                <tr v-if="paginatedData.length === 0">
+                    <td :colspan="(props.headers?.length ?? 0) + 1" class="text-center py-6 text-gray-500 text-sm">
+                        No results found
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-            <div class="flex items-center gap-3">
+    <div class="flex justify-between items-center mt-6">
+        <p class="text-sm text-gray-500">
+            Showing {{ paginatedData.length }} of {{ sortedData?.length ?? 0 }} results
+        </p>
 
-                <button @click="prevPage" :disabled="currentPage === 1" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-md 
+        <div class="flex items-center gap-3">
+
+            <button @click="prevPage" :disabled="currentPage === 1" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-md 
                            disabled:opacity-50 hover:bg-gray-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                        stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+
+            <div class="flex items-center gap-2">
+                <button v-for="page in visiblePages" :key="page + '-p'"
+                    @click="page !== '...' && goToPage(Number(page))" :disabled="page === '...'"
+                    class="px-4 py-2 rounded-md border text-sm" :class="page === currentPage
+                        ? 'bg-blue-100 text-gray-700 border-blue-300'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'">
+                    {{ page }}
                 </button>
-
-                <div class="flex items-center gap-2">
-                    <button v-for="page in visiblePages" :key="page + '-p'"
-                        @click="page !== '...' && goToPage(Number(page))" :disabled="page === '...'"
-                        class="px-4 py-2 rounded-md border text-sm" :class="page === currentPage
-                            ? 'bg-blue-100 text-gray-700 border-blue-300'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'">
-                        {{ page }}
-                    </button>
-                </div>
-
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-md 
-                           disabled:opacity-50 hover:bg-gray-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                        stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
-
             </div>
+
+            <button @click="nextPage" :disabled="currentPage === totalPages" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-md 
+                           disabled:opacity-50 hover:bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+
         </div>
     </div>
+
 </template>
 
 <script lang="ts" setup>

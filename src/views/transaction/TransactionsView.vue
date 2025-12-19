@@ -1,9 +1,11 @@
 <template>
-  <div class="relative p-6">
-    <Table :headers="['ID', 'UUID', 'Full name', 'Email', 'Status', 'More']" :data="transactions" :perPage="10">
+  <div class="bg-white p-6 rounded-lg shadow-md space-y-5">
+    <PageHeader title="List Transaction" :icon="DocumentTextIcon" />
+    <Table :headers="['ID', 'Transaction uuid', 'Full name', 'Email', 'Status', 'More']" :data="transactions"
+      :perPage="10">
       <template #row-actions="{ row }">
         <td class="px-6 py-2 text-right">
-          <button @click="openDetails(row.UUID)" class="text-gray-600 hover:text-blue-500 transition inline-flex"
+          <button @click="openDetails(row['Transaction uuid'])" class="text-gray-600 hover:text-blue-500 transition inline-flex"
             aria-label="Show transaction details">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="w-6 h-6">
@@ -33,20 +35,23 @@
 </template>
 
 <script lang="ts" setup>
-import Table from '@/components/Table.vue';
+import { ref, onMounted } from 'vue'
+import Swal from 'sweetalert2'
+import { DocumentTextIcon } from '@heroicons/vue/24/outline'
 import { transactionService } from '@/services/transactions/TransactionService';
 import { STATUS_STYLES, TransactionStatus } from '@/enums/TransactionStatus';
-import Swal from 'sweetalert2'
-import { ref, onMounted } from 'vue'
-import type { TransactionList } from '@/types/transactions/TransactionTypes';
 import { useRouter } from 'vue-router'
 import { useTransactionsStore } from '@/stores/Transactions';
+import type { TransactionList, TransactionRow } from '@/types/transactions/TransactionTypes';
+import Table from '@/components/Table.vue';
+import PageHeader from '@/components/PageHeader.vue';
 
 const router = useRouter()
 const isLoading = ref(false)
 const transactionsRaw = ref<TransactionList>([] as unknown as TransactionList)
-const transactions = ref<any[]>([])
+const transactions = ref<TransactionRow[]>([])
 const store = useTransactionsStore()
+
 onMounted(() => {
   if (Array.isArray(store.transactionsRaw) && !store.transactionsRaw.length) {
     store.fetchTransactions();
@@ -77,7 +82,7 @@ onMounted(async () => {
     transactionsRaw.value = transactionsList
     transactions.value = transactionsList.map(t => ({
       ID: t.id,
-      UUID: t.transactionUuid,
+      'Transaction uuid': t.transactionUuid,
       'Full name': t.fullname,
       Email: t.email,
       Status: {
