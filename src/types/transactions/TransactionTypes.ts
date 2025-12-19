@@ -42,6 +42,17 @@ export interface Transaction {
     updatedAt?: string
 }
 
+export interface TransactionRow {
+    ID: string
+    'Transaction uuid': string
+    'Full name': string
+    Email: string
+    Status: {
+        text: string
+        class: string
+    }
+}
+
 export type TransactionList = Transaction[]
 
 export type RefundTransactionRequest = { transactionUuid: string };

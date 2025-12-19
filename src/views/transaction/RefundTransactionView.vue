@@ -2,16 +2,7 @@
     <div class="flex justify-center">
         <div class="w-full max-w-3xl space-y-8">
             <div class="bg-white p-6 rounded-lg shadow-md space-y-5">
-                <div class="flex items-center gap-3 mb-6">
-                    <div
-                        class="flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-tr from-blue-200 to-blue-400 shadow">
-                        <ArrowUturnLeftIcon class="w-6 h-6 text-white" />
-                    </div>
-                    <h2 class="text-xl font-semibold text-gray-800">
-                        Refund payment
-                    </h2>
-                </div>
-
+                <PageHeader title="Refund payment" :icon="ArrowUturnLeftIcon" />
                 <div class="space-y-5">
                     <FormInput v-model=transactionUuid label="Transaction UUID" type="text"
                         placeholder="Enter your transaction uuid" required />
@@ -53,6 +44,7 @@ import FormInput from '@/components/FormInput.vue'
 import CopyableInput from '@/components/CopyableInput.vue'
 import type { RefundTransactionRequest } from '@/types/transactions/TransactionTypes'
 import { transactionService } from '@/services/transactions/TransactionService'
+import PageHeader from '@/components/PageHeader.vue'
 
 const isLoading = ref(false)
 const transactionUuid = ref<string | null>(null)

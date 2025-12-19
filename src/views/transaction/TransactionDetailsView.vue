@@ -82,7 +82,7 @@
 import { useTransactionsStore } from '@/stores/Transactions'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { TransactionStatus, STATUS_STYLES } from '@/enums/TransactionStatus'
+import { statusClass, formatDate } from '@/utils/formatters'
 
 const router = useRouter()
 const route = useRoute()
@@ -93,18 +93,6 @@ const transaction = computed(() =>
 )
 
 const close = () => router.back()
-
-const statusClass = (status: string) => {
-    return STATUS_STYLES[status as TransactionStatus] ?? 'bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-xs font-semibold'
-}
-
-const formatDate = (iso: string) => {
-    const date = new Date(iso)
-    return `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')
-        }.${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')
-        }:${date.getSeconds().toString().padStart(2, '0')}`
-}
-
 </script>
 
 <style>

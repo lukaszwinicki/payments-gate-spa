@@ -6,12 +6,19 @@
                     <h1 class="text-2xl font-bold text-black">Admin Panel</h1>
                 </div>
                 <nav class="flex flex-col p-4 space-y-1">
-                    <RouterLink v-for="link in navigationLinks" :key="link.name" :to="link.to"
-                        class="flex items-center px-4 py-2 font-semibold text-gray-500 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                        :class="{ 'bg-blue-100 text-blue-500 font-semibold': $route.path === link.to }">
-                        <component :is="link.icon" class="w-5 h-5 mr-3" />
-                        {{ link.name }}
-                    </RouterLink>
+                    <template v-for="link in navigationLinks" :key="link.name">
+                        <RouterLink v-if="link.to" :to="link.to"
+                            class="flex items-center px-4 py-2 font-semibold text-gray-500 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                            :class="{ 'bg-blue-100 text-blue-500 font-semibold': $route.path === link.to }">
+                            <component :is="link.icon" class="w-5 h-5 mr-3" />
+                            {{ link.name }}
+                        </RouterLink>
+                        <a v-else-if="link.href" :href="link.href" target="_blank" rel="noopener noreferrer"
+                            class="flex items-center px-4 py-2 font-semibold text-gray-500 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                            <component :is="link.icon" class="w-5 h-5 mr-3" />
+                            {{ link.name }}
+                        </a>
+                    </template>
                 </nav>
             </div>
 
@@ -40,17 +47,17 @@
 <script setup>
 import { ref } from "vue";
 import axios from 'axios'
-import { useRoute, useRouter, RouterLink } from 'vue-router'
-import { computed } from 'vue'
+import { useRouter, RouterLink } from 'vue-router'
 import {
     LinkIcon,
     ServerIcon,
     ReceiptRefundIcon,
     KeyIcon,
     BanknotesIcon,
+    BellAlertIcon,
+    DocumentTextIcon
 } from '@heroicons/vue/24/outline'
 
-const route = useRoute()
 const router = useRouter()
 const isLoading = ref(false)
 
@@ -61,17 +68,19 @@ const user = {
 }
 
 const navigationLinks = [
-    { name: 'Transactions', to: '/admin/transactions', icon: BanknotesIcon },
     { name: 'Create Transaction', to: '/admin/create-transaction', icon: ServerIcon },
     { name: 'Create Payment Link', to: '/admin/create-payment-link', icon: LinkIcon },
     { name: 'Payment Refunds', to: '/admin/payment-refunds', icon: ReceiptRefundIcon },
-    { name: 'API Credentials', to: '/admin/api-credentials', icon: KeyIcon }
+    { name: 'Transactions', to: '/admin/transactions', icon: BanknotesIcon },
+    { name: 'Notifications', to: '/admin/notifications', icon: BellAlertIcon },
+    { name: 'API Credentials', to: '/admin/api-credentials', icon: KeyIcon },
+    {
+        name: 'API Documentation',
+        href: import.meta.env.VITE_API_DOCUMENTATION,
+        icon: DocumentTextIcon,
+        external: true
+    }
 ]
-
-const currentPage = computed(() => {
-    const page = navigationLinks.find(link => link.to === route.path)
-    return page ? page.name : 'Unknown Page'
-})
 
 const handleLogout = async () => {
     isLoading.value = true

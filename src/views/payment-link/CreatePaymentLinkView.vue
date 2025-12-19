@@ -2,17 +2,7 @@
     <div class="flex justify-center">
         <div class="w-full max-w-3xl space-y-8">
             <div class="bg-white p-6 rounded-lg shadow-md space-y-5">
-
-                <div class="flex items-center gap-3 mb-6">
-                    <div
-                        class="flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-tr from-blue-200 to-blue-400 shadow">
-                        <LinkIcon class="w-6 h-6 text-white" />
-                    </div>
-                    <h2 class="text-xl font-semibold text-gray-800">
-                        Generate Payment Link
-                    </h2>
-                </div>
-
+                <PageHeader title="Generate Payment Link" :icon="LinkIcon" />
                 <div class="space-y-5">
                     <FormInput v-model="amount" label="Amount" type="number" required />
                     <FormInput v-model="currency" label="Currency" type="text" required />
@@ -59,6 +49,7 @@ import Swal from 'sweetalert2'
 import { CheckCircleIcon, LinkIcon } from '@heroicons/vue/24/outline'
 import FormInput from '@/components/FormInput.vue'
 import CopyableInput from '@/components/CopyableInput.vue'
+import PageHeader from '@/components/PageHeader.vue';
 import { paymentLinkService } from '@/services/payment-links/PaymentLinkService'
 import type { PaymentLinkRequest } from '@/types/payment-links/PaymentLinkTypes'
 
