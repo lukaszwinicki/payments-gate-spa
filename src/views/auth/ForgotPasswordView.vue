@@ -42,9 +42,10 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
+import { authService } from '@/services/auth/AuthService';
+import type { ForgotPasswordRequest } from '@/types/auth/AuthTypes';
 import { ref } from 'vue';
-import axios from "axios";
 
 const email = ref('');
 const isLoading = ref(false);
@@ -57,15 +58,25 @@ const handleForgotPassword = async () => {
   errorMessage.value = '';
 
   try {
-    await axios.post("/api/forgot-password", {
+    const forgotPasswordData: ForgotPasswordRequest = {
       email: email.value,
-    });
-    message.value = 'Password reset link sent to your email.';
-   
-  } catch (error) {
-    errorMessage.value = error.response.data.message;
+    }
+
+    const forgotPasswordResponse = await authService.forgotPassword(forgotPasswordData)
+    message.value = forgotPasswordResponse.message || 'Password reset link sent to your email.';
+
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      errorMessage.value = err.message;
+    } else if (typeof err === 'object' && err !== null && 'registerResult' in err) {
+      const r: any = (err as any).registerResult;
+      errorMessage.value = r?.message || 'Failed to send reset link.';
+    } else {
+      errorMessage.value = 'Failed to send reset link.';
+    }
   } finally {
     isLoading.value = false;
   }
 }
+
 </script>

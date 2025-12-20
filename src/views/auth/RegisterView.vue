@@ -10,7 +10,7 @@
 
                 <div>
                     <label for="name" class="block text-gray-600 font-medium mb-1">Full Name</label>
-                    <input v-model="name" type="text" id="name" required placeholder="Enter your full name"
+                    <input v-model="fullname" type="text" id="fullname" required placeholder="Enter your full name"
                         class="border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded w-full px-3 py-2 text-gray-700" />
                 </div>
 
@@ -60,13 +60,14 @@
     </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from 'vue';
-import axios from "axios";
 import { useRouter } from 'vue-router'
+import type { RegisterRequest } from '@/types/auth/AuthTypes';
+import { authService } from '@/services/auth/AuthService';
 
 const router = useRouter()
-const name = ref('');
+const fullname = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
@@ -75,26 +76,31 @@ const message = ref('');
 const errorMessage = ref('');
 
 const handleRegister = async () => {
+    
     isLoading.value = true;
     errorMessage.value = "";
 
     try {
-        const registerResponse = await axios.post("/api/register", {
-            name: name.value,
+        const registerData: RegisterRequest = {
+            name: fullname.value,
             email: email.value,
             password: password.value,
-            password_confirmation: confirmPassword.value,
-        });
+            password_confirmation: confirmPassword.value
+        }
 
-        localStorage.setItem('token_expiry', registerResponse.data.expiresAt)
-        localStorage.setItem('token', registerResponse.data.token);
+        const registerResponse = await authService.register(registerData)
+        localStorage.setItem('token_expiry', registerResponse.expiresAt)
+        localStorage.setItem('token', registerResponse.token)
+        router.push("/merchant/dashboard");
 
-        router.push("/admin");
-    } catch (error) {
-        if (error.response?.data?.errors) {
-            errorMessage.value = Object.values(error.response.data.errors).flat().join(' ');
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            errorMessage.value = err.message
+        } else if (typeof err === 'object' && err !== null && 'response' in err) {
+            const resp: any = (err as any).response
+            errorMessage.value = resp?.data?.error ?? 'Register failed'
         } else {
-            errorMessage.value = error.response?.data?.message || 'Registration failed';
+            errorMessage.value = 'Register failed. Please try again.'
         }
     } finally {
         isLoading.value = false;

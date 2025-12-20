@@ -19,11 +19,7 @@
             class="border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded w-full px-3 py-2 text-gray-700" />
         </div>
 
-        <div class="flex items-center justify-between text-sm">
-          <label class="flex items-center text-gray-600">
-            <input v-model="rememberMe" type="checkbox" class="mr-2 text-blue-600 focus:ring-blue-500 rounded" />
-            Remember me
-          </label>
+        <div class="flex items-center justify-end text-sm">
           <router-link to="/forgot-password" class="text-blue-600 hover:underline font-medium">Forgot
             password?</router-link>
         </div>
@@ -54,46 +50,42 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from "vue";
-import axios from "axios";
 import { useRouter } from 'vue-router'
+import type { LoginRequest } from "@/types/auth/AuthTypes";
+import { authService } from "@/services/auth/AuthService";
 
 const router = useRouter()
 const email = ref("");
 const password = ref("");
-const rememberMe = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref("");
 
 const handleLogin = async () => {
+
   isLoading.value = true;
   errorMessage.value = "";
 
   try {
-    const responseLogin = await axios.post("/api/login", {
+    const loginData: LoginRequest = {
       email: email.value,
       password: password.value,
-      remember: rememberMe.value,
-    });
+    }
 
-    localStorage.setItem('token_expiry', responseLogin.data.expiresAt)
-    localStorage.setItem('token', responseLogin.data.token)
+    const loginResponse = await authService.login(loginData)
+    localStorage.setItem('token_expiry', loginResponse.expiresAt)
+    localStorage.setItem('token', loginResponse.token)
+    router.push("/merchant/dashboard");
 
-    router.push("/admin");
-  } catch (error) {
-    if (!error.response) {
-      errorMessage.value = "Network error. Please try again.";
-    } else if (error.response.status === 422) {
-      errorMessage.value = Object.values(error.response.data.errors || {})
-        .flat()
-        .join(' ') || "Invalid input";
-    } else if (error.response.status === 401) {
-      errorMessage.value = "Invalid credentials";
-    } else if (error.response.status === 423) {
-      errorMessage.value = "Account is locked";
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      errorMessage.value = err.message
+    } else if (typeof err === 'object' && err !== null && 'response' in err) {
+      const resp: any = (err as any).response
+      errorMessage.value = resp?.data?.error ?? 'Login failed'
     } else {
-      errorMessage.value = "An error occurred";
+      errorMessage.value = 'Login failed. Please try again.'
     }
   } finally {
     isLoading.value = false;

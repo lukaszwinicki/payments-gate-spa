@@ -56,24 +56,23 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
+import { authService } from '@/services/auth/AuthService';
+import type { ResetPasswordRequest } from '@/types/auth/AuthTypes';
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from "axios";
 
 const route = useRoute();
 const router = useRouter();
-
-const form = ref({
-  token: route.query.token,
-  email: route.query.email || '',
-  password: '',
-  password_confirmation: ''
-});
-
 const isLoading = ref(false);
 const message = ref('');
 const errorMessage = ref('');
+const form = ref({
+  token: route.query.token as string || '',
+  email: route.query.email as string || '',
+  password: '',
+  password_confirmation: ''
+});
 
 const handleReset = async () => {
   isLoading.value = true;
@@ -81,14 +80,26 @@ const handleReset = async () => {
   errorMessage.value = '';
 
   try {
-    const res = await axios.post('/api/reset-password', form.value);
-    message.value = res.data.status || 'Password has been reset successfully.';
+    const resetPasswordData: ResetPasswordRequest = {
+      token: form.value.token,
+      email: form.value.email,
+      password: form.value.password,
+      password_confirmation: form.value.password_confirmation
+    };
+
+    const resetPasswordResponse = await authService.resetPassword(resetPasswordData)
+    message.value = resetPasswordResponse.message || 'Password has been reset successfully.';
+
     setTimeout(() => {
       router.push('/login');
     }, 1500);
 
-  } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Something went wrong.';
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      errorMessage.value = err.message;
+    } else {
+      errorMessage.value = 'Failed to reset password.';
+    }
   } finally {
     isLoading.value = false;
   }
