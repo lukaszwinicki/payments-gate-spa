@@ -2,11 +2,11 @@
   <div class="bg-white p-6 rounded-lg shadow-md space-y-5">
     <PageHeader title="List Transaction" :icon="DocumentTextIcon" />
     <Table :headers="['ID', 'Transaction uuid', 'Full name', 'Email', 'Status', 'More']" :data="transactions"
-      :perPage="10">
+      :perPage="10" :searchable="true" :sortable="true" :paginated="true">
       <template #row-actions="{ row }">
         <td class="px-6 py-2 text-right">
-          <button @click="openDetails(row['Transaction uuid'])" class="text-gray-600 hover:text-blue-500 transition inline-flex"
-            aria-label="Show transaction details">
+          <button @click="openDetails(row['Transaction uuid'])"
+            class="text-gray-600 hover:text-blue-500 transition inline-flex" aria-label="Show transaction details">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round"
@@ -39,12 +39,12 @@ import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
 import { DocumentTextIcon } from '@heroicons/vue/24/outline'
 import { transactionService } from '@/services/transactions/TransactionService';
-import { STATUS_STYLES, TransactionStatus } from '@/enums/TransactionStatus';
 import { useRouter } from 'vue-router'
 import { useTransactionsStore } from '@/stores/Transactions';
 import type { TransactionList, TransactionRow } from '@/types/transactions/TransactionTypes';
 import Table from '@/components/Table.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import { statusClass } from '@/utils/formatters';
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -87,7 +87,7 @@ onMounted(async () => {
       Email: t.email,
       Status: {
         text: t.status,
-        class: STATUS_STYLES[t.status as TransactionStatus] ?? 'bg-gray-100 text-gray-600'
+        class: statusClass(t.status)
       }
     }));
   }

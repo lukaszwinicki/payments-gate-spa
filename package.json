@@ -17,11 +17,13 @@
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
     "@tailwindcss/vite": "^4.1.14",
+    "apexcharts": "^5.3.6",
     "axios": "^1.12.2",
     "pinia": "^3.0.3",
     "sweetalert2": "^11.26.3",
     "vue": "^3.5.22",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "vue3-apexcharts": "^1.10.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
