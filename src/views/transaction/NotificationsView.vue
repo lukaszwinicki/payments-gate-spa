@@ -2,7 +2,7 @@
     <div class="bg-white p-6 rounded-lg shadow-md space-y-5">
         <PageHeader title="List notification" :icon="BellIcon" />
         <Table :headers="['ID', 'Uuid transaction', 'Status notification', 'Status transaction', 'Data created']"
-            :data="notifications" :perPage="10" />
+            :data="notifications" :perPage="10" :searchable="true" :sortable="true" :paginated="true" />
         <div v-if="isLoading"
             class="absolute inset-0 z-20 flex items-center justify-center bg-white/40 backdrop-blur-sm rounded-xl">
             <div class="w-10 h-10 border-4 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />

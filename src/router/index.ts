@@ -13,6 +13,7 @@ import CreatePaymentLinkView from '@/views/payment-link/CreatePaymentLinkView.vu
 import ApiCredentialsView from '@/views/profile/ApiCredentialsView.vue'
 import TransactionDetailsView from '@/views/transaction/TransactionDetailsView.vue'
 import NotificationsView from '@/views/transaction/NotificationsView.vue'
+import DashboardView from '@/views/dashboard/DashboardView.vue'
 
 const routes = [
   {
@@ -42,10 +43,12 @@ const routes = [
     component: RegisterView
   },
   {
-    path: '/admin',
+    path: '/merchant',
     component: AdminLayout,
+    redirect: '/merchant/dashboard',
     meta: { requiresAuth: true },
     children: [
+      { path: 'dashboard', component: DashboardView },
       { path: 'create-transaction', component: CreateTransactionView },
       { path: 'create-payment-link', component: CreatePaymentLinkView },
       { path: 'payment-refunds', component: RefundTransactionView },

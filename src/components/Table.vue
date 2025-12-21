@@ -1,7 +1,5 @@
 <template>
-
-
-    <div class="flex justify-between items-center mb-4">
+    <div v-if="searchable" class="flex justify-between items-center mb-4">
         <input v-model="searchQuery" type="text" placeholder="Search..."
             class="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-300" />
     </div>
@@ -11,17 +9,18 @@
 
             <thead class="bg-gray-50">
                 <tr>
-                    <th v-for="(header, index) in props.headers" :key="index" @click="sortBy(String(header))" class="px-6 py-4 text-left text-xs font-semibold 
-                                   text-gray-700 uppercase tracking-wide cursor-pointer
-                                   hover:text-blue-600 transition select-none">
+                    <th v-for="(header, index) in headers" :key="index" @click="sortable && sortBy(String(header))"
+                        class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide" :class="sortable
+                            ? 'cursor-pointer text-gray-700 hover:text-blue-600'
+                            : 'text-gray-500'">
                         <div class="flex items-center gap-1">
                             <span>{{ header }}</span>
-
-                            <span v-if="sortColumn === header" class="text-blue-600">
+                            <span v-if="sortable && sortColumn === header" class="text-blue-600">
                                 {{ sortDirection === 'asc' ? '▲' : '▼' }}
                             </span>
                         </div>
                     </th>
+                    <th v-if="$slots['row-actions']" class="px-6 py-4"></th>
                 </tr>
             </thead>
 
@@ -53,7 +52,7 @@
         </table>
     </div>
 
-    <div class="flex justify-between items-center mt-6">
+    <div v-if="paginated" class="flex justify-between items-center mt-6">
         <p class="text-sm text-gray-500">
             Showing {{ paginatedData.length }} of {{ sortedData?.length ?? 0 }} results
         </p>
@@ -97,7 +96,10 @@ import { ref, computed } from 'vue'
 const props = defineProps({
     headers: Array,
     data: Array,
-    perPage: { type: Number, default: 5 }
+    perPage: { type: Number, default: 5 },
+    searchable: { type: Boolean, default: true },
+    sortable: { type: Boolean, default: true },
+    paginated: { type: Boolean, deafult: true }
 })
 
 const searchQuery = ref('')

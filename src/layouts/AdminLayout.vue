@@ -3,7 +3,7 @@
         <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between fixed inset-y-0 z-40">
             <div>
                 <div class="p-6 border-b border-gray-100">
-                    <h1 class="text-2xl font-bold text-black">Admin Panel</h1>
+                    <h1 class="text-2xl font-bold text-black">Merchant Panel</h1>
                 </div>
                 <nav class="flex flex-col p-4 space-y-1">
                     <template v-for="link in navigationLinks" :key="link.name">
@@ -55,7 +55,8 @@ import {
     KeyIcon,
     BanknotesIcon,
     BellAlertIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    HomeIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -68,12 +69,13 @@ const user = {
 }
 
 const navigationLinks = [
-    { name: 'Create Transaction', to: '/admin/create-transaction', icon: ServerIcon },
-    { name: 'Create Payment Link', to: '/admin/create-payment-link', icon: LinkIcon },
-    { name: 'Payment Refunds', to: '/admin/payment-refunds', icon: ReceiptRefundIcon },
-    { name: 'Transactions', to: '/admin/transactions', icon: BanknotesIcon },
-    { name: 'Notifications', to: '/admin/notifications', icon: BellAlertIcon },
-    { name: 'API Credentials', to: '/admin/api-credentials', icon: KeyIcon },
+    { name: 'Dashboard', to: '/merchant/dashboard', icon: HomeIcon },
+    { name: 'Create Transaction', to: '/merchant/create-transaction', icon: ServerIcon },
+    { name: 'Create Payment Link', to: '/merchant/create-payment-link', icon: LinkIcon },
+    { name: 'Payment Refunds', to: '/merchant/payment-refunds', icon: ReceiptRefundIcon },
+    { name: 'Transactions', to: '/merchant/transactions', icon: BanknotesIcon },
+    { name: 'Notifications', to: '/merchant/notifications', icon: BellAlertIcon },
+    { name: 'API Credentials', to: '/merchant/api-credentials', icon: KeyIcon },
     {
         name: 'API Documentation',
         href: import.meta.env.VITE_API_DOCUMENTATION,
