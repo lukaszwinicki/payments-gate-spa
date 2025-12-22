@@ -15,11 +15,12 @@
 </template>
 
 <script lang="ts" setup>
+import type { Component } from 'vue'
 
 const props = defineProps<{
   label: string;
   value: string | number;
-  icon: object;
+  icon: Component;
 }>()
 
 </script>

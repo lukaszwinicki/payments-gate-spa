@@ -3,8 +3,11 @@
     <div class="grid grid-cols-4 gap-6">
       <div class="col-span-3 grid gap-6">
 
-        <div class="grid grid-cols-3 gap-6">
-          <KpiCard label="Total transactions" value="100" :icon="BanknotesIcon" />
+        <div class="grid grid-cols-4 gap-6">
+          <KpiCard label="Total transactions" :value="transactionsTotal?.total ?? 0" :icon="BanknotesIcon" />
+          <KpiCard label="Balance PLN" :value="transactionsBalances?.pln ?? 0" :icon="BanknotesIcon" />
+          <KpiCard label="Balance EUR" :value="transactionsBalances?.eur ?? 0" :icon="CurrencyEuroIcon" />
+          <KpiCard label="Balance USD" :value="transactionsBalances?.usd ?? 0" :icon="CurrencyDollarIcon" />
         </div>
 
         <div class="grid grid-cols-2 gap-6">
@@ -24,27 +27,33 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { BanknotesIcon } from '@heroicons/vue/24/outline'
+import { BanknotesIcon, CurrencyDollarIcon, CurrencyEuroIcon } from '@heroicons/vue/24/outline'
 import Swal from 'sweetalert2'
 import KpiCard from '@/components/KpiCard.vue'
 import PaymentMethodDonut from '@/components/PaymentMethodDonut.vue'
 import Table from '@/components/Table.vue'
-import type { PaymentMethodShare, RecentTransactionResponse } from '@/types/dashboard/DashboardTypes'
+import type { PaymentMethodShare, RecentTransactionResponse, TransactionBalancesResponse, TransactionsTotalResponse } from '@/types/dashboard/DashboardTypes'
 import { dashboardService } from '@/services/dashboard/DashboardService'
 import { statusClass, formatDate } from '@/utils/formatters'
 
 const isLoading = ref(false)
 const transactions = ref<RecentTransactionResponse>([])
 const paymentMethods = ref<PaymentMethodShare[]>([])
+const transactionsTotal = ref<TransactionsTotalResponse | null>(null)
+const transactionsBalances = ref<TransactionBalancesResponse | null>(null)
 
 onMounted(async () => {
   try {
     const [
       recentTransactions,
-      paymentMethodShare
+      paymentMethodShare,
+      total,
+      balances
     ] = await Promise.all([
       dashboardService.getRecentTransaction(),
-      dashboardService.getPaymentMethodShare()
+      dashboardService.getPaymentMethodShare(),
+      dashboardService.getTransactionTotal(),
+      dashboardService.getTransactionBalances(),
     ])
     transactions.value = recentTransactions.map(t => ({
       'Transaction uuid': t.transactionUuid,
@@ -58,6 +67,9 @@ onMounted(async () => {
     }));
 
     paymentMethods.value = paymentMethodShare
+    transactionsTotal.value = total
+    transactionsBalances.value = balances
+
   }
   catch (err: any) {
     await Swal.fire({
