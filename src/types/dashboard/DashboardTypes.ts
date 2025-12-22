@@ -13,5 +13,15 @@ export interface PaymentMethodShare {
     percentage: number
 }
 
+export interface TransactionsTotalResponse {
+    total: string
+}
+
+export interface TransactionBalancesResponse {
+    pln: string,
+    eur: string,
+    usd: string
+}
+
 export type RecentTransactionResponse = RecentTransaction[]
 export type PaymentMethodShareResponse = PaymentMethodShare[]
