@@ -23,5 +23,9 @@ export interface TransactionBalancesResponse {
     usd: string
 }
 
+export interface TransactionRejectedResponse {
+    total: string
+}
+
 export type RecentTransactionResponse = RecentTransaction[]
 export type PaymentMethodShareResponse = PaymentMethodShare[]
