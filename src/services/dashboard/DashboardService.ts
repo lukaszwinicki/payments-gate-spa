@@ -1,5 +1,5 @@
 import { getAuthHeaders } from '@/lib/http/getAuthHeaders'
-import type { PaymentMethodShareResponse, RecentTransactionResponse, TransactionBalancesResponse, TransactionsTotalResponse } from '@/types/dashboard/DashboardTypes';
+import type { PaymentMethodShareResponse, RecentTransactionResponse, TransactionBalancesResponse, TransactionRejectedResponse, TransactionsTotalResponse } from '@/types/dashboard/DashboardTypes';
 
 export class DashboardService {
 
@@ -88,6 +88,30 @@ export class DashboardService {
                 throw { status: transactionBalancesResponse.status, data: transactionBalancesResult };
             }
             return transactionBalancesResult as TransactionBalancesResponse;
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                throw new Error(err.message);
+            } else if (typeof err === 'object' && err !== null && 'status' in err && 'data' in err) {
+                throw err;
+            } else {
+                throw new Error('Failed. Please try again.');
+            }
+        }
+    }
+
+    async getTransactionRejected(): Promise<TransactionRejectedResponse> {
+        try {
+            const transactionRejectedResponse = await fetch('/api/analytics/transactions/rejected', {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            })
+
+            const transactionRejectedResult = await transactionRejectedResponse.json()
+
+            if (!transactionRejectedResponse.ok) {
+                throw { status: transactionRejectedResponse.status, data: transactionRejectedResult };
+            }
+            return transactionRejectedResult as TransactionRejectedResponse;
         } catch (err: unknown) {
             if (err instanceof Error) {
                 throw new Error(err.message);

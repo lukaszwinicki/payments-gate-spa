@@ -1,10 +1,11 @@
 <template>
   <div class="space-y-8">
     <div class="grid grid-cols-4 gap-6">
-      <div class="col-span-3 grid gap-6">
+      <div class="col-span-4 grid gap-6">
 
-        <div class="grid grid-cols-4 gap-6">
+        <div class="grid grid-cols-5 gap-6">
           <KpiCard label="Total transactions" :value="transactionsTotal?.total ?? 0" :icon="BanknotesIcon" />
+          <KpiCard label="Rejected transactions" :value="transactionsRejected?.total ?? 0" :icon="XCircleIcon" />
           <KpiCard label="Balance PLN" :value="transactionsBalances?.pln ?? 0" :icon="BanknotesIcon" />
           <KpiCard label="Balance EUR" :value="transactionsBalances?.eur ?? 0" :icon="CurrencyEuroIcon" />
           <KpiCard label="Balance USD" :value="transactionsBalances?.usd ?? 0" :icon="CurrencyDollarIcon" />
@@ -27,12 +28,12 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { BanknotesIcon, CurrencyDollarIcon, CurrencyEuroIcon } from '@heroicons/vue/24/outline'
+import { BanknotesIcon, CurrencyDollarIcon, CurrencyEuroIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 import Swal from 'sweetalert2'
 import KpiCard from '@/components/KpiCard.vue'
 import PaymentMethodDonut from '@/components/PaymentMethodDonut.vue'
 import Table from '@/components/Table.vue'
-import type { PaymentMethodShare, RecentTransactionResponse, TransactionBalancesResponse, TransactionsTotalResponse } from '@/types/dashboard/DashboardTypes'
+import type { PaymentMethodShare, RecentTransactionResponse, TransactionBalancesResponse, TransactionRejectedResponse, TransactionsTotalResponse } from '@/types/dashboard/DashboardTypes'
 import { dashboardService } from '@/services/dashboard/DashboardService'
 import { statusClass, formatDate } from '@/utils/formatters'
 
@@ -41,6 +42,7 @@ const transactions = ref<RecentTransactionResponse>([])
 const paymentMethods = ref<PaymentMethodShare[]>([])
 const transactionsTotal = ref<TransactionsTotalResponse | null>(null)
 const transactionsBalances = ref<TransactionBalancesResponse | null>(null)
+const transactionsRejected = ref<TransactionRejectedResponse | null>(null)
 
 onMounted(async () => {
   try {
@@ -48,12 +50,14 @@ onMounted(async () => {
       recentTransactions,
       paymentMethodShare,
       total,
-      balances
+      balances,
+      rejeceted,
     ] = await Promise.all([
       dashboardService.getRecentTransaction(),
       dashboardService.getPaymentMethodShare(),
       dashboardService.getTransactionTotal(),
       dashboardService.getTransactionBalances(),
+      dashboardService.getTransactionRejected(),
     ])
     transactions.value = recentTransactions.map(t => ({
       'Transaction uuid': t.transactionUuid,
@@ -69,6 +73,7 @@ onMounted(async () => {
     paymentMethods.value = paymentMethodShare
     transactionsTotal.value = total
     transactionsBalances.value = balances
+    transactionsRejected.value = rejeceted
 
   }
   catch (err: any) {
