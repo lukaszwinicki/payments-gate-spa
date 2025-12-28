@@ -57,10 +57,11 @@
 </template>
 
 <script lang="ts" setup>
-import { authService } from '@/services/auth/AuthService';
-import type { ResetPasswordRequest } from '@/types/auth/AuthTypes';
-import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { mapApiErrorToMessage } from '@/lib/errors/mapApiErrorToMessage'
+import type { ResetPasswordRequest } from '@/types/auth/AuthTypes'
 
 const route = useRoute();
 const router = useRouter();
@@ -74,32 +75,30 @@ const form = ref({
   password_confirmation: ''
 });
 
+const auth = useAuthStore()
+
 const handleReset = async () => {
   isLoading.value = true;
   message.value = '';
   errorMessage.value = '';
 
   try {
-    const resetPasswordData: ResetPasswordRequest = {
+    const payload: ResetPasswordRequest = {
       token: form.value.token,
       email: form.value.email,
       password: form.value.password,
-      password_confirmation: form.value.password_confirmation
+      passwordConfirmation: form.value.password_confirmation
     };
 
-    const resetPasswordResponse = await authService.resetPassword(resetPasswordData)
-    message.value = resetPasswordResponse.message || 'Password has been reset successfully.';
+    const response = await auth.resetPassword(payload)
+    message.value = response.message || 'Password has been reset successfully.';
 
     setTimeout(() => {
       router.push('/login');
     }, 1500);
 
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      errorMessage.value = err.message;
-    } else {
-      errorMessage.value = 'Failed to reset password.';
-    }
+  } catch (error) {
+    errorMessage.value = mapApiErrorToMessage(error)
   } finally {
     isLoading.value = false;
   }

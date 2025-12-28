@@ -43,14 +43,17 @@
 </template>
 
 <script lang="ts" setup>
-import { authService } from '@/services/auth/AuthService';
-import type { ForgotPasswordRequest } from '@/types/auth/AuthTypes';
-import { ref } from 'vue';
+import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { mapApiErrorToMessage } from '@/lib/errors/mapApiErrorToMessage'
+import type { ForgotPasswordRequest } from '@/types/auth/AuthTypes'
 
 const email = ref('');
 const isLoading = ref(false);
 const message = ref('');
 const errorMessage = ref('');
+
+const auth = useAuthStore()
 
 const handleForgotPassword = async () => {
   isLoading.value = true;
@@ -58,22 +61,15 @@ const handleForgotPassword = async () => {
   errorMessage.value = '';
 
   try {
-    const forgotPasswordData: ForgotPasswordRequest = {
+    const payload: ForgotPasswordRequest = {
       email: email.value,
     }
 
-    const forgotPasswordResponse = await authService.forgotPassword(forgotPasswordData)
-    message.value = forgotPasswordResponse.message || 'Password reset link sent to your email.';
+    const response = await auth.forgotPassword(payload)
+    message.value = response.message || 'Password reset link sent to your email.';
 
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      errorMessage.value = err.message;
-    } else if (typeof err === 'object' && err !== null && 'registerResult' in err) {
-      const r: any = (err as any).registerResult;
-      errorMessage.value = r?.message || 'Failed to send reset link.';
-    } else {
-      errorMessage.value = 'Failed to send reset link.';
-    }
+  } catch (error) {
+    errorMessage.value = mapApiErrorToMessage(error)
   } finally {
     isLoading.value = false;
   }
