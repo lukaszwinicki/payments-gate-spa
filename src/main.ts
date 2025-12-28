@@ -4,15 +4,16 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './style.css'
-import axios from 'axios';
 import VueApexCharts from 'vue3-apexcharts'
+import { setupInterceptors } from './lib/http/interceptors'
 
 const app = createApp(App)
+const pinia = createPinia()
 
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
-
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.use(VueApexCharts)
+
+setupInterceptors(pinia)
 
 app.mount('#app')

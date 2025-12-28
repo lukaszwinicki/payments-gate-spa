@@ -51,42 +51,32 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { useRouter } from 'vue-router'
-import type { LoginRequest } from "@/types/auth/AuthTypes";
-import { authService } from "@/services/auth/AuthService";
+import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth'
+import type { LoginRequest } from '@/types/auth/AuthTypes'
+import { mapApiErrorToMessage } from '@/lib/errors/mapApiErrorToMessage'
 
-const router = useRouter()
-const email = ref("");
-const password = ref("");
+const email = ref('');
+const password = ref('');
 const isLoading = ref(false);
-const errorMessage = ref("");
+const errorMessage = ref('');
+
+const auth = useAuthStore()
 
 const handleLogin = async () => {
 
   isLoading.value = true;
-  errorMessage.value = "";
+  errorMessage.value = '';
 
   try {
-    const loginData: LoginRequest = {
+    const payload: LoginRequest = {
       email: email.value,
       password: password.value,
     }
 
-    const loginResponse = await authService.login(loginData)
-    localStorage.setItem('token_expiry', loginResponse.expiresAt)
-    localStorage.setItem('token', loginResponse.token)
-    router.push("/merchant/dashboard");
-
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      errorMessage.value = err.message
-    } else if (typeof err === 'object' && err !== null && 'response' in err) {
-      const resp: any = (err as any).response
-      errorMessage.value = resp?.data?.error ?? 'Login failed'
-    } else {
-      errorMessage.value = 'Login failed. Please try again.'
-    }
+    await auth.login(payload)
+  } catch (error) {
+    errorMessage.value = mapApiErrorToMessage(error)
   } finally {
     isLoading.value = false;
   }

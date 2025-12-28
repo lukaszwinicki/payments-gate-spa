@@ -44,10 +44,7 @@
             <div v-if="isLoading" class="flex justify-center items-center py-4">
                 <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
-
-            <div v-if="message" class="text-center text-green-600 font-medium">
-                {{ message }}
-            </div>
+            
             <div v-if="errorMessage" class="text-center text-red-500 font-medium">
                 {{ errorMessage }}
             </div>
@@ -62,46 +59,35 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router'
-import type { RegisterRequest } from '@/types/auth/AuthTypes';
-import { authService } from '@/services/auth/AuthService';
+import { useAuthStore } from '@/stores/auth';
+import { mapApiErrorToMessage } from '@/lib/errors/mapApiErrorToMessage'
+import type { RegisterRequest } from '@/types/auth/AuthTypes'
 
-const router = useRouter()
 const fullname = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const isLoading = ref(false);
-const message = ref('');
 const errorMessage = ref('');
 
+const auth = useAuthStore()
+
 const handleRegister = async () => {
-    
+
     isLoading.value = true;
     errorMessage.value = "";
 
     try {
-        const registerData: RegisterRequest = {
+        const payload: RegisterRequest = {
             name: fullname.value,
             email: email.value,
             password: password.value,
-            password_confirmation: confirmPassword.value
+            passwordConfirmation: confirmPassword.value
         }
 
-        const registerResponse = await authService.register(registerData)
-        localStorage.setItem('token_expiry', registerResponse.expiresAt)
-        localStorage.setItem('token', registerResponse.token)
-        router.push("/merchant/dashboard");
-
-    } catch (err: unknown) {
-        if (err instanceof Error) {
-            errorMessage.value = err.message
-        } else if (typeof err === 'object' && err !== null && 'response' in err) {
-            const resp: any = (err as any).response
-            errorMessage.value = resp?.data?.error ?? 'Register failed'
-        } else {
-            errorMessage.value = 'Register failed. Please try again.'
-        }
+        await auth.register(payload)
+    } catch (error) {
+        errorMessage.value = mapApiErrorToMessage(error)
     } finally {
         isLoading.value = false;
     }
