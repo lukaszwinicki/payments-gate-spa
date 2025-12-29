@@ -110,6 +110,9 @@ import { PaymentMethod } from '@/enums/PaymentMethod'
 import { TransactionStatus } from '@/enums/TransactionStatus'
 import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/transactions/TransactionStatus'
 import type { ConfirmPaymentLinkRequest, PaymentLinkDetailsResponse } from '@/types/payment-links/PaymentLinkTypes'
+import { useApiError } from '@/composables/useApiError'
+import { showDialog } from '@/lib/errors/showDialog'
+import { getMissingFields } from '@/lib/errors/getMissingFields';
 
 const route = useRoute()
 const payment = ref<PaymentLinkDetailsResponse | null>(null)
@@ -143,6 +146,8 @@ function returnToMerchant() {
     isLoading.value = false
   }
 }
+
+const { handleApiError } = useApiError()
 
 const getPaymentDetails = async (id: string) => {
   try {
@@ -187,19 +192,15 @@ const statusMessage = computed(() => {
 })
 
 const createTransaction = async () => {
-  const missing = [
-    !fullname.value && 'Full name',
-    !email.value && 'Email',
-    !selectedPaymentMethod.value && 'Payment method',
-  ].filter(Boolean)
+
+  const missing = getMissingFields({
+    'Full name': fullname.value,
+    Email: email.value,
+    'Payment method': selectedPaymentMethod.value,
+  })
 
   if (missing.length) {
-    await Swal.fire({
-      icon: 'warning',
-      title: 'Incomplete form',
-      html: `Please fill in:<br><b>${missing.join(', ')}</b>`,
-      confirmButtonColor: '#2563eb',
-    })
+    await showDialog('warning', `Please fill in:<br>${missing.join(', ')}`, 'Incomplete form')
     return
   }
 
@@ -219,13 +220,8 @@ const createTransaction = async () => {
       redirectToProvider.value = true
       setTimeout(() => (window.location.href = link), 800)
     }
-  } catch (err: any) {
-    await Swal.fire({
-      icon: 'error',
-      title: 'Transaction error',
-      text: err.response?.data?.error ?? err.message ?? 'Unknown error',
-      confirmButtonColor: '#ef4444',
-    })
+  } catch (error) {
+    await handleApiError(error, 'Transaction error')
   } finally {
     isLoading.value = false
   }

@@ -20,6 +20,7 @@ export const setupInterceptors = (pinia: Pinia) => {
         (response) => response,
         (error) => {
             const status = error.response?.status ?? 0
+            const data = error.response?.data
 
             if (status === 401 && !isLoggingOut) {
                 isLoggingOut = true
@@ -27,11 +28,17 @@ export const setupInterceptors = (pinia: Pinia) => {
                 auth.logout()
             }
 
+            let message = data?.message ?? 'Unexpected error'
+
+            if (status === 422 && data?.error) {
+                message = Object.values(data.error).flat().join(' ')
+            }
+
             const apiError: ApiError = {
                 status,
-                message: error.response?.data?.message ?? 'Unexpected error',
-                errors: error.response?.data?.errors,
-                data: error.response?.data,
+                message,
+                errors: data?.errors,
+                data,
             }
 
             return Promise.reject(apiError)

@@ -29,20 +29,29 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { BanknotesIcon, CurrencyDollarIcon, CurrencyEuroIcon, XCircleIcon } from '@heroicons/vue/24/outline'
-import Swal from 'sweetalert2'
 import KpiCard from '@/components/KpiCard.vue'
 import PaymentMethodDonut from '@/components/PaymentMethodDonut.vue'
 import Table from '@/components/Table.vue'
-import type { PaymentMethodShare, RecentTransactionResponse, TransactionBalancesResponse, TransactionRejectedResponse, TransactionsTotalResponse } from '@/types/dashboard/DashboardTypes'
 import { dashboardService } from '@/services/dashboard/DashboardService'
 import { statusClass, formatDate } from '@/utils/formatters'
+import { useApiError } from '@/composables/useApiError'
+import type {
+  PaymentMethodShare,
+  RecentTransaction,
+  RecentTransactionDisplay,
+  TransactionBalancesResponse,
+  TransactionRejectedResponse,
+  TransactionsTotalResponse
+} from '@/types/dashboard/DashboardTypes'
 
 const isLoading = ref(false)
-const transactions = ref<RecentTransactionResponse>([])
+const transactions = ref<RecentTransactionDisplay[]>([])
 const paymentMethods = ref<PaymentMethodShare[]>([])
 const transactionsTotal = ref<TransactionsTotalResponse | null>(null)
 const transactionsBalances = ref<TransactionBalancesResponse | null>(null)
 const transactionsRejected = ref<TransactionRejectedResponse | null>(null)
+
+const { handleApiError } = useApiError()
 
 onMounted(async () => {
   try {
@@ -59,16 +68,16 @@ onMounted(async () => {
       dashboardService.getTransactionBalances(),
       dashboardService.getTransactionRejected(),
     ])
-    transactions.value = recentTransactions.map(t => ({
-      'Transaction uuid': t.transactionUuid,
-      Amount: t.amount + ' ' + t.currency,
-      'Payment Method': t.paymentMethod,
-      Status: {
+    transactions.value = recentTransactions.map((t: RecentTransaction) => ({
+      transactionUuid: t.transactionUuid,
+      amount: `${t.amount} ${t.currency}`,
+      paymentMethod: t.paymentMethod,
+      status: {
         text: t.status,
-        class: statusClass(t.status)
+        class: statusClass(t.status),
       },
-      Date: formatDate(t.createdAt)
-    }));
+      date: formatDate(t.createdAt),
+    }))
 
     paymentMethods.value = paymentMethodShare
     transactionsTotal.value = total
@@ -76,13 +85,8 @@ onMounted(async () => {
     transactionsRejected.value = rejeceted
 
   }
-  catch (err: any) {
-    await Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: err.response?.error ?? err.message ?? 'Unknown error',
-      confirmButtonColor: '#ef4444',
-    })
+  catch (error) {
+    await handleApiError(error, 'Error')
   } finally {
     isLoading.value = false;
   }

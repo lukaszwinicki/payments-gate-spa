@@ -27,5 +27,16 @@ export interface TransactionRejectedResponse {
     total: string
 }
 
+export interface RecentTransactionDisplay {
+    transactionUuid: string,
+    amount: string,
+    paymentMethod: string,
+    status: {
+        text: string,
+        class: string
+    },
+    date: string
+}
+
 export type RecentTransactionResponse = RecentTransaction[]
 export type PaymentMethodShareResponse = PaymentMethodShare[]
