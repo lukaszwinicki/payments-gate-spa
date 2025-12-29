@@ -45,13 +45,15 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import Swal from 'sweetalert2'
 import { CheckCircleIcon, LinkIcon } from '@heroicons/vue/24/outline'
 import FormInput from '@/components/FormInput.vue'
 import CopyableInput from '@/components/CopyableInput.vue'
 import PageHeader from '@/components/PageHeader.vue';
 import { paymentLinkService } from '@/services/payment-links/PaymentLinkService'
 import type { PaymentLinkRequest } from '@/types/payment-links/PaymentLinkTypes'
+import { useApiError } from '@/composables/useApiError'
+import { showDialog } from '@/lib/errors/showDialog'
+import { getMissingFields } from '@/lib/errors/getMissingFields';
 
 const amount = ref<string | null>(null)
 const currency = ref<string | null>(null)
@@ -61,22 +63,20 @@ const returnUrl = ref<string | null>(null)
 const isLoading = ref(false)
 const paymentLink = ref<string | null>(null)
 
+const { handleApiError } = useApiError()
+
 const createPaymentLink = async () => {
-    const missing = [
-        !amount.value && 'Amount',
-        !currency.value && 'Currency',
-        !expiresAt.value && 'Expires at',
-        !notificationUrl.value && 'Notification URL',
-        !returnUrl.value && 'Return URL',
-    ].filter(Boolean)
+
+    const missing = getMissingFields({
+        Amount: amount.value,
+        Currency: currency.value,
+        ExpiresAt: expiresAt.value,
+        NotificationURL: notificationUrl.value,
+        ReturnURL: returnUrl.value,
+    })
 
     if (missing.length) {
-        await Swal.fire({
-            icon: 'warning',
-            title: 'Incomplete form',
-            html: `Please fill in:<br><b>${missing.join(', ')}</b>`,
-            confirmButtonColor: '#2563eb',
-        })
+        await showDialog('warning', `Please fill in:<br>${missing.join(', ')}`, 'Incomplete form')
         return
     }
 
@@ -92,14 +92,10 @@ const createPaymentLink = async () => {
         }
 
         const response = await paymentLinkService.createPaymentLink(paymentLinkData)
+
         paymentLink.value = response.link
-    } catch (err: any) {
-        await Swal.fire({
-            icon: 'error',
-            title: 'Transaction error',
-            text: err.response?.data?.error ?? err.message ?? 'Unknown error',
-            confirmButtonColor: '#ef4444',
-        })
+    } catch (error) {
+        await handleApiError(error, 'Create payment link failed', 'error')
     } finally {
         isLoading.value = false
     }
