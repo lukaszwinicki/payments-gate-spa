@@ -32,9 +32,9 @@
             <header class="bg-white shadow-sm border-b border-gray-100 px-6 py-5 flex justify-end items-center">
                 <div class="flex items-center gap-4">
                     <div class="text-sm text-gray-600">
-                        Hello, <span class="font-semibold">{{ user.name }}</span>
+                        Hello, <span class="font-semibold">{{ user?.name }}</span>
                     </div>
-                    <img class="w-10 h-10 rounded-full border" :src="user.avatar" alt="User avatar" />
+                    <img class="w-10 h-10 rounded-full border" :src="user?.avatar" alt="User avatar" />
                 </div>
             </header>
             <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
@@ -45,9 +45,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import axios from 'axios'
-import { useRouter, RouterLink } from 'vue-router'
+import { ref, computed } from "vue";
+import { useAuthStore } from '@/stores/auth';
+import { RouterLink } from 'vue-router'
 import {
     LinkIcon,
     ServerIcon,
@@ -59,14 +59,15 @@ import {
     HomeIcon
 } from '@heroicons/vue/24/outline'
 
-const router = useRouter()
+const authStore = useAuthStore();
 const isLoading = ref(false)
-
-const user = {
-    name: 'Admin User',
-    avatar:
-        'https://ui-avatars.com/api/?background=random&color=fff&name=Admin+User',
-}
+const user = computed(() => {
+    if (!authStore.user) return null
+    return {
+        ...authStore.user,
+        avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${encodeURIComponent(authStore.user.name)}`
+    }
+})
 
 const navigationLinks = [
     { name: 'Dashboard', to: '/merchant/dashboard', icon: HomeIcon },
@@ -84,10 +85,9 @@ const navigationLinks = [
     }
 ]
 
-const handleLogout = async () => {
+const handleLogout = () => {
     isLoading.value = true
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    router.push('/login');
+    authStore.logout()
+    isLoading.value = false
 }
 </script>

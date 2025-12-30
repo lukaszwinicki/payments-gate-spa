@@ -38,31 +38,30 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import Swal from 'sweetalert2'
 import { ArrowUturnLeftIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
 import FormInput from '@/components/FormInput.vue'
 import CopyableInput from '@/components/CopyableInput.vue'
 import type { RefundTransactionRequest } from '@/types/transactions/TransactionTypes'
 import { transactionService } from '@/services/transactions/TransactionService'
 import PageHeader from '@/components/PageHeader.vue'
+import { useApiError } from '@/composables/useApiError'
+import { showDialog } from '@/lib/errors/showDialog'
+import { getMissingFields } from '@/lib/errors/getMissingFields';
 
 const isLoading = ref(false)
 const transactionUuid = ref<string | null>(null)
 const refundTransactionUuid = ref<string | null>(null)
 const refundSuccess = ref(false)
 
+const { handleApiError } = useApiError()
+
 const refundPayment = async () => {
-    const missing = [
-        !transactionUuid.value && 'Transaction UUID',
-    ].filter(Boolean)
+    const missing = getMissingFields({
+        TransactionUuid: transactionUuid.value,
+    })
 
     if (missing.length) {
-        await Swal.fire({
-            icon: 'warning',
-            title: 'Incomplete form',
-            html: `Please fill in:<br><b>${missing.join(', ')}</b>`,
-            confirmButtonColor: '#2563eb',
-        })
+        await showDialog('warning', `Please fill in:<br>${missing.join(', ')}`, 'Incomplete form')
         return
     }
 
@@ -77,13 +76,8 @@ const refundPayment = async () => {
 
         refundTransactionUuid.value = refundTransactionResponse.transactionUuid
         refundSuccess.value = true;
-    } catch (err: any) {
-        await Swal.fire({
-            icon: 'error',
-            title: 'Transaction error',
-            text: err.response?.data?.error ?? err.message ?? 'Unknown error',
-            confirmButtonColor: '#ef4444',
-        })
+    } catch (error) {
+        await handleApiError(error, 'Refund transaction failed', 'error')
     }
     finally {
         isLoading.value = false

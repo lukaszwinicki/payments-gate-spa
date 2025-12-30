@@ -55,16 +55,18 @@
 </template>
 
 <script lang="ts" setup>
-import FormInput from '@/components/FormInput.vue';
-import FormSelect from '@/components/FormSelect.vue';
-import CopyableInput from '@/components/CopyableInput.vue'
-import { PaymentMethod } from '@/enums/PaymentMethod';
-import { PlusIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
-import Swal from 'sweetalert2'
-import type { CreateTransactionRequest } from '@/types/transactions/TransactionTypes';
-import { transactionService } from '@/services/transactions/TransactionService';
-import PageHeader from '@/components/PageHeader.vue';
+import FormInput from '@/components/FormInput.vue'
+import FormSelect from '@/components/FormSelect.vue'
+import CopyableInput from '@/components/CopyableInput.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import { PaymentMethod } from '@/enums/PaymentMethod'
+import { PlusIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
+import type { CreateTransactionRequest } from '@/types/transactions/TransactionTypes'
+import { transactionService } from '@/services/transactions/TransactionService'
+import { useApiError } from '@/composables/useApiError'
+import { showDialog } from '@/lib/errors/showDialog'
+import { getMissingFields } from '@/lib/errors/getMissingFields';
 
 const fullname = ref<string | null>(null)
 const email = ref<string | null>(null)
@@ -78,31 +80,29 @@ const isLoading = ref(false)
 const paymentLink = ref<string | null>(null)
 const transactionUuid = ref<string | null>(null)
 
+const { handleApiError } = useApiError()
+
 const createTransaction = async () => {
-    const missing = [
-        !fullname.value && 'Full name',
-        !email.value && 'Email',
-        !amount.value && 'Amount',
-        !currency.value && 'Currency',
-        !selectedPaymentMethod.value && 'Payment Method',
-        !notificationUrl.value && 'Notification URL',
-        !returnUrl.value && 'Return URL',
-    ].filter(Boolean)
+
+    const missing = getMissingFields({
+        Fullname: fullname.value,
+        Emial: email.value,
+        Amount: amount.value,
+        Currency: currency.value,
+        PaymentMethod: selectedPaymentMethod.value,
+        NotificationURL: notificationUrl.value,
+        ReturnURL: returnUrl.value,
+    })
 
     if (missing.length) {
-        await Swal.fire({
-            icon: 'warning',
-            title: 'Incomplete form',
-            html: `Please fill in:<br><b>${missing.join(', ')}</b>`,
-            confirmButtonColor: '#2563eb',
-        })
+        await showDialog('warning', `Please fill in:<br>${missing.join(', ')}`, 'Incomplete form')
         return
     }
 
     isLoading.value = true
 
     try {
-        const paymentsData: CreateTransactionRequest = {
+        const paymentData: CreateTransactionRequest = {
             name: fullname.value ?? '',
             email: email.value ?? '',
             amount: Number(amount.value ?? 0),
@@ -112,17 +112,12 @@ const createTransaction = async () => {
             returnUrl: returnUrl.value ?? '',
         }
 
-        const transactionResponse = await transactionService.createTransaction(paymentsData)
+        const transactionResponse = await transactionService.createTransaction(paymentData)
 
         paymentLink.value = transactionResponse.link
         transactionUuid.value = transactionResponse.transactionUuid
-    } catch (err: any) {
-        await Swal.fire({
-            icon: 'error',
-            title: 'Transaction error',
-            text: err.response?.data?.error ?? err.message ?? 'Unknown error',
-            confirmButtonColor: '#ef4444',
-        })
+    } catch (error) {
+        await handleApiError(error, 'Create transaction failed', 'error')
     }
     finally {
         isLoading.value = false

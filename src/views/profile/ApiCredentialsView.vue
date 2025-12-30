@@ -42,6 +42,7 @@ import { ShieldCheckIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outlin
 import CopyableInput from '@/components/CopyableInput.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { transactionService } from '@/services/transactions/TransactionService'
+import { useApiError } from '@/composables/useApiError'
 
 const apiKey = ref('')
 const secretKey = ref('')
@@ -70,13 +71,18 @@ const toggleSecretKey = () => {
     showSecretKey.value = !showSecretKey.value
 }
 
+const { handleApiError } = useApiError()
+
 onMounted(async () => {
     isLoading.value = true
     try {
         const apiCredentials = await transactionService.getApiCredentials()
         apiKey.value = apiCredentials.apiKey
         secretKey.value = apiCredentials.secretKey
-    } finally {
+    } catch(error) {
+        await handleApiError(error, 'Error', 'error')
+    }
+    finally {
         isLoading.value = false
     }
 })

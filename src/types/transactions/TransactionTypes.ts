@@ -43,18 +43,12 @@ export interface Transaction {
 }
 
 export interface TransactionRow {
-    ID: string
-    'Transaction uuid': string
-    'Full name': string
-    Email: string
-    Status: {
-        text: string
-        class: string
-    }
+    id: string;
+    transactionUuid: string;
+    fullname: string;
+    email: string;
+    status: { text: string; class: string; };
 }
-
-export type TransactionList = Transaction[]
 
 export type RefundTransactionRequest = { transactionUuid: string };
 export type RefundTransactionResponse = { transactionUuid: string };
-

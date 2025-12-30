@@ -6,16 +6,14 @@
 
     <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
         <table class="min-w-full divide-y divide-gray-200">
-
             <thead class="bg-gray-50">
                 <tr>
-                    <th v-for="(header, index) in headers" :key="index" @click="sortable && sortBy(String(header))"
-                        class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide" :class="sortable
-                            ? 'cursor-pointer text-gray-700 hover:text-blue-600'
-                            : 'text-gray-500'">
+                    <th v-for="header in headers" :key="header.key" @click="sortable && sortBy(header.key)"
+                        class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide"
+                        :class="sortable ? 'cursor-pointer text-gray-700 hover:text-blue-600' : 'text-gray-500'">
                         <div class="flex items-center gap-1">
-                            <span>{{ header }}</span>
-                            <span v-if="sortable && sortColumn === header" class="text-blue-600">
+                            <span>{{ header.label }}</span>
+                            <span v-if="sortable && sortColumn === header.key" class="text-blue-600">
                                 {{ sortDirection === 'asc' ? '▲' : '▼' }}
                             </span>
                         </div>
@@ -26,25 +24,23 @@
 
             <tbody class="bg-white divide-y divide-gray-100">
                 <tr v-for="(row, index) in paginatedData" :key="index" class="hover:bg-blue-50 transition">
-                    <td v-for="(key, i) in Object.keys(row)" :key="key" class="px-6 py-4 text-sm text-gray-800">
-                        <template v-if="typeof row[key] === 'object'
-                            && row[key] !== null
-                            && 'class' in row[key]
-                            && 'text' in row[key]">
-                            <span :class="row[key].class">
-                                {{ row[key].text }}
+                    <td v-for="header in headers" :key="header.key" class="px-6 py-4 text-sm text-gray-800">
+                        <template v-if="header.isStatus && row[header.key] && typeof row[header.key] === 'object'">
+                            <span :class="(row[header.key] as StatusObject).class">
+                                {{ (row[header.key] as StatusObject).text }}
                             </span>
                         </template>
                         <template v-else>
-                            {{ row[key] }}
+                            {{ row[header.key] }}
                         </template>
                     </td>
-                    <div class="flex justify-left items-center">
+                    <td v-if="$slots['row-actions']">
                         <slot name="row-actions" :row="row"></slot>
-                    </div>
+                    </td>
                 </tr>
                 <tr v-if="paginatedData.length === 0">
-                    <td :colspan="(props.headers?.length ?? 0) + 1" class="text-center py-6 text-gray-500 text-sm">
+                    <td :colspan="headers.length + ($slots['row-actions'] ? 1 : 0)"
+                        class="text-center py-6 text-gray-500 text-sm">
                         No results found
                     </td>
                 </tr>
@@ -52,19 +48,15 @@
         </table>
     </div>
 
-    <div v-if="paginated" class="flex justify-between items-center mt-6">
+    <div v-if="paginated && totalPages > 1" class="flex justify-between items-center mt-6">
         <p class="text-sm text-gray-500">
-            Showing {{ paginatedData.length }} of {{ sortedData?.length ?? 0 }} results
+            Showing {{ showingCount.start }} - {{ showingCount.end }} of {{ sortedData.length }} results
         </p>
 
         <div class="flex items-center gap-3">
-
-            <button @click="prevPage" :disabled="currentPage === 1" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-md 
-                           disabled:opacity-50 hover:bg-gray-200">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
+            <button @click="prevPage" :disabled="currentPage === 1"
+                class="px-3 py-2 bg-gray-100 text-gray-600 rounded-md disabled:opacity-50 hover:bg-gray-200">
+                ‹
             </button>
 
             <div class="flex items-center gap-2">
@@ -77,92 +69,102 @@
                 </button>
             </div>
 
-            <button @click="nextPage" :disabled="currentPage === totalPages" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-md 
-                           disabled:opacity-50 hover:bg-gray-200">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+            <button @click="nextPage" :disabled="currentPage === totalPages"
+                class="px-3 py-2 bg-gray-100 text-gray-600 rounded-md disabled:opacity-50 hover:bg-gray-200">
+                ›
             </button>
-
         </div>
     </div>
-
 </template>
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 
-const props = defineProps({
-    headers: Array,
-    data: Array,
-    perPage: { type: Number, default: 5 },
-    searchable: { type: Boolean, default: true },
-    sortable: { type: Boolean, default: true },
-    paginated: { type: Boolean, deafult: true }
-})
+interface Header {
+    label: string
+    key: string
+    isStatus?: boolean
+    isDate?: boolean
+}
+
+interface StatusObject {
+    text: string
+    class: string
+}
+
+const props = defineProps<{
+    headers: Header[]
+    data: Array<Record<string, any>>
+    perPage?: number
+    searchable?: boolean
+    sortable?: boolean
+    paginated?: boolean
+}>()
 
 const searchQuery = ref('')
+const sortColumn = ref<string | null>(null)
+const sortDirection = ref<'asc' | 'desc'>('asc')
+const currentPage = ref(1)
 
-const filteredData = computed<any[]>(() => {
+const filteredData = computed(() => {
     if (!props.data) return []
-
     if (!searchQuery.value) return props.data
-
     const q = searchQuery.value.toLowerCase()
-
     return props.data.filter(row =>
-        row &&
-        typeof row === 'object' &&
-        Object.values(row).some(val =>
-            String(val).toLowerCase().includes(q)
-        )
+        Object.values(row).some(val => String(val).toLowerCase().includes(q))
     )
 })
 
-const sortColumn = ref<string | null>(null)
-const sortDirection = ref<'asc' | 'desc'>('asc')
-
 function sortBy(column: string) {
-    sortDirection.value =
-        sortColumn.value === column && sortDirection.value === 'asc'
-            ? 'desc'
-            : 'asc'
-    sortColumn.value = column
+    if (sortColumn.value === column) {
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+    } else {
+        sortColumn.value = column
+        sortDirection.value = 'asc'
+    }
 }
 
-const sortedData = computed<any[]>(() => {
+const sortedData = computed(() => {
     if (!sortColumn.value) return filteredData.value
-
     return [...filteredData.value].sort((a, b) => {
-        const key = sortColumn.value as string
+        const aVal = a[sortColumn.value!]
+        const bVal = b[sortColumn.value!]
 
-        let x = a[key]
-        let y = b[key]
+        if (aVal == null) return 1
+        if (bVal == null) return -1
 
-        x = typeof x === 'string' ? x.toLowerCase() : x
-        y = typeof y === 'string' ? y.toLowerCase() : y
+        let comparison = 0
 
-        if (sortDirection.value === 'asc') return x > y ? 1 : -1
-        return x < y ? 1 : -1
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+            comparison = aVal - bVal
+        } else if (aVal instanceof Date && bVal instanceof Date) {
+            comparison = aVal.getTime() - bVal.getTime()
+        } else {
+            comparison = String(aVal).localeCompare(String(bVal))
+        }
+
+        return sortDirection.value === 'asc' ? comparison : -comparison
     })
 })
 
-const currentPage = ref(1)
-const totalPages = computed(() =>
-    Math.ceil((sortedData.value?.length ?? 0) / (props.perPage ?? 1))
-)
+const totalPages = computed(() => Math.ceil(sortedData.value.length / (props.perPage ?? 5)))
 
 const paginatedData = computed(() => {
-    const start = (currentPage.value - 1) * (props.perPage ?? 1)
-    const data = sortedData.value ?? []
-    return data.slice(start, start + (props.perPage ?? 1))
+    const start = (currentPage.value - 1) * (props.perPage ?? 5)
+    const end = start + (props.perPage ?? 5)
+    return sortedData.value.slice(start, end)
+})
+
+const showingCount = computed(() => {
+    if (!sortedData.value.length) return { start: 0, end: 0 }
+    const start = (currentPage.value - 1) * (props.perPage ?? 5) + 1
+    const end = Math.min(currentPage.value * (props.perPage ?? 5), sortedData.value.length)
+    return { start, end }
 })
 
 function nextPage() {
     if (currentPage.value < totalPages.value) currentPage.value++
 }
-
 function prevPage() {
     if (currentPage.value > 1) currentPage.value--
 }
@@ -171,25 +173,17 @@ function goToPage(page: number) {
 }
 
 const visiblePages = computed(() => {
-    const pages = []
+    const pages: (number | string)[] = []
     const total = totalPages.value
     const current = currentPage.value
-
     if (total <= 5) return [...Array(total)].map((_, i) => i + 1)
-
     pages.push(1)
-
-    if (current > 3) pages.push("...")
-
+    if (current > 3) pages.push('...')
     const start = Math.max(2, current - 1)
     const end = Math.min(total - 1, current + 1)
-
     for (let i = start; i <= end; i++) pages.push(i)
-
-    if (current < total - 2) pages.push("...")
-
+    if (current < total - 2) pages.push('...')
     pages.push(total)
-
     return pages
 })
 </script>

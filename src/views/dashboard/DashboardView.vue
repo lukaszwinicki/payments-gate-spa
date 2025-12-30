@@ -19,8 +19,8 @@
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <h3 class="text-gray-700 font-semibold mb-4">Latest transactions</h3>
-      <Table :headers="['Transaction uuid', 'Amount', 'Payment Method', 'Status', 'Date']" :data="transactions"
-        :perPage="10" :searchable="false" :sortable="false" :paginated="false">
+      <Table :headers="headers" :data="transactions" :perPage="10" :searchable="false" :sortable="false"
+        :paginated="false">
       </Table>
     </div>
   </div>
@@ -50,6 +50,14 @@ const paymentMethods = ref<PaymentMethodShare[]>([])
 const transactionsTotal = ref<TransactionsTotalResponse | null>(null)
 const transactionsBalances = ref<TransactionBalancesResponse | null>(null)
 const transactionsRejected = ref<TransactionRejectedResponse | null>(null)
+
+const headers = [
+  { label: 'Transaction UUID', key: 'transactionUuid' },
+  { label: 'Amount', key: 'amount' },
+  { label: 'Payment Method', key: 'paymentMethod' },
+  { label: 'Status', key: 'status', isStatus: true },
+  { label: 'Date', key: 'date' }
+]
 
 const { handleApiError } = useApiError()
 
