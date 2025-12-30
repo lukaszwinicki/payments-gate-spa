@@ -10,12 +10,14 @@ import type {
     ForgotPasswordResponse,
     ResetPasswordRequest,
     ResetPasswordResponse,
+    User
 } from '@/types/auth/AuthTypes'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         token: localStorage.getItem('token') as string | null,
-        expiresAt: localStorage.getItem('expiresAt') as string | null
+        expiresAt: localStorage.getItem('expiresAt') as string | null,
+        user: JSON.parse(localStorage.getItem('user') || 'null') as User | null
     }),
 
     getters: {
@@ -27,8 +29,10 @@ export const useAuthStore = defineStore('auth', {
             const { data } = await api.post<LoginResponse>('/login', payload)
             this.token = data.token
             this.expiresAt = data.expiresAt
+            this.user = data.user
             localStorage.setItem('token', data.token)
             localStorage.setItem('expiresAt', data.expiresAt)
+            localStorage.setItem('user', JSON.stringify(data.user))
             router.push({ name: 'dashboard' })
         },
 
@@ -44,8 +48,10 @@ export const useAuthStore = defineStore('auth', {
         logout() {
             this.token = null
             this.expiresAt = null
+            this.user = null
             localStorage.removeItem('token')
             localStorage.removeItem('expiresAt')
+            localStorage.removeItem('user')
             router.push({ name: 'login' })
         },
 

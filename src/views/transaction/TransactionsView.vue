@@ -1,11 +1,10 @@
 <template>
   <div class="bg-white p-6 rounded-lg shadow-md space-y-5">
     <PageHeader title="List Transaction" :icon="DocumentTextIcon" />
-    <Table :headers="['ID', 'Transaction uuid', 'Full name', 'Email', 'Status', 'More']" :data="transactions"
-      :perPage="10" :searchable="true" :sortable="true" :paginated="true">
+    <Table :headers="headers" :data="transactions" :perPage="10" :searchable="true" :sortable="true" :paginated="true">
       <template #row-actions="{ row }">
         <td class="px-6 py-2 text-right">
-          <button @click="openDetails(row['Transaction uuid'])"
+          <button @click="openDetails(row.transactionUuid)"
             class="text-gray-600 hover:text-blue-500 transition inline-flex" aria-label="Show transaction details">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="w-6 h-6">
@@ -36,21 +35,30 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import Swal from 'sweetalert2'
 import { DocumentTextIcon } from '@heroicons/vue/24/outline'
 import { transactionService } from '@/services/transactions/TransactionService';
 import { useRouter } from 'vue-router'
 import { useTransactionsStore } from '@/stores/Transactions';
-import type { TransactionList, TransactionRow } from '@/types/transactions/TransactionTypes';
+import type { Transaction, TransactionRow } from '@/types/transactions/TransactionTypes';
 import Table from '@/components/Table.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import { statusClass } from '@/utils/formatters';
+import { useApiError } from '@/composables/useApiError'
 
 const router = useRouter()
 const isLoading = ref(false)
-const transactionsRaw = ref<TransactionList>([] as unknown as TransactionList)
 const transactions = ref<TransactionRow[]>([])
 const store = useTransactionsStore()
+
+const headers = [
+  { label: 'ID', key: 'id' },
+  { label: 'Transaction UUID', key: 'transactionUuid' },
+  { label: 'Full Name', key: 'fullname' },
+  { label: 'Email', key: 'email' },
+  { label: 'Status', key: 'status', isStatus: true }
+]
+
+const { handleApiError } = useApiError()
 
 onMounted(() => {
   if (Array.isArray(store.transactionsRaw) && !store.transactionsRaw.length) {
@@ -59,15 +67,12 @@ onMounted(() => {
 })
 
 const openDetails = (uuid: string) => {
-  const transaction = Array.isArray(transactionsRaw.value)
-    ? transactionsRaw.value.find((t: any) => t.transactionUuid === uuid)
-    : null;
-
+  const transaction = transactions.value.find(t => t.transactionUuid === uuid)
   if (!transaction) return
 
   router.push({
     name: 'transaction-details',
-    params: { transactionUuid: uuid },
+    params: { transactionUuid: uuid }
   })
 }
 
@@ -79,25 +84,19 @@ onMounted(async () => {
   isLoading.value = true;
   try {
     const transactionsList = await transactionService.getTransctionsList();
-    transactionsRaw.value = transactionsList
-    transactions.value = transactionsList.map(t => ({
-      ID: t.id,
-      'Transaction uuid': t.transactionUuid,
-      'Full name': t.fullname,
-      Email: t.email,
-      Status: {
+    transactions.value = transactionsList.map((t: Transaction) => ({
+      id: t.id,
+      transactionUuid: t.transactionUuid,
+      fullname: t.fullname,
+      email: t.email,
+      status: {
         text: t.status,
         class: statusClass(t.status)
       }
     }));
   }
-  catch (err: any) {
-    await Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: err.response?.error ?? err.message ?? 'Unknown error',
-      confirmButtonColor: '#ef4444',
-    })
+  catch (error) {
+    await handleApiError(error, 'Error', 'error')
   } finally {
     isLoading.value = false;
   }

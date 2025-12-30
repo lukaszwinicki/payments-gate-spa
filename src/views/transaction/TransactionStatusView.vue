@@ -41,6 +41,7 @@ import { useRoute } from 'vue-router'
 import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/transactions/TransactionStatus'
 import { transactionService } from '@/services/transactions/TransactionService';
 import type { TransactionStatus } from '@/enums/TransactionStatus';
+import { useApiError } from '@/composables/useApiError'
 
 const route = useRoute();
 const isLoading = ref(false)
@@ -72,6 +73,8 @@ function returnToMerchant() {
     }
 }
 
+const { handleApiError } = useApiError()
+
 onMounted(async () => {
     if (!uuid) {
         isLoading.value = false
@@ -85,7 +88,8 @@ onMounted(async () => {
         currency.value = response.currency
         paymentMethod.value = response.paymentMethod
         returnUrl.value = response.returnUrl
-    } catch {
+    } catch (error) {
+        await handleApiError(error, 'Payment status', 'info')
         status.value = 'ERROR'
         amount.value = 'ERROR'
         paymentMethod.value = 'ERROR'

@@ -7,11 +7,9 @@ export interface Notification {
 }
 
 export interface NotificationRow {
-    ID: number
-    'Transaction uuid': string
-    'Status notification': { text: string, class: string }
-    'Status transaction': { text: string, class: string }
-    'Data created': string
+    id: number
+    transactionUuid: string
+    status: { text: string; class: string; }
+    statusType: { text: string; class: string; }
+    createdAt: string
 }
-
-export type NotificationList = Notification[]
