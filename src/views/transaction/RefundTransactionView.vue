@@ -41,7 +41,7 @@ import { ref } from 'vue'
 import { ArrowUturnLeftIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
 import FormInput from '@/components/FormInput.vue'
 import CopyableInput from '@/components/CopyableInput.vue'
-import type { RefundTransactionRequest } from '@/types/transactions/TransactionTypes'
+import type { RefundTransactionRequest, RefundTransactionForm } from '@/types/transactions/TransactionTypes'
 import { transactionService } from '@/services/transactions/TransactionService'
 import PageHeader from '@/components/PageHeader.vue'
 import { useApiError } from '@/composables/useApiError'
@@ -55,13 +55,26 @@ const refundSuccess = ref(false)
 
 const { handleApiError } = useApiError()
 
+const FORM_LABELS: Record<keyof RefundTransactionForm, string> = {
+    transactionUuid: 'Transaction Uuid',
+}
+
 const refundPayment = async () => {
+
     const missing = getMissingFields({
-        TransactionUuid: transactionUuid.value,
+        transactionUuid: transactionUuid.value,
     })
 
     if (missing.length) {
-        await showDialog('warning', `Please fill in:<br>${missing.join(', ')}`, 'Incomplete form')
+        const message = missing
+            .map(field => FORM_LABELS[field])
+            .join(', ')
+
+        await showDialog(
+            'warning',
+            `Please fill in:<br>${message}`,
+            'Incomplete form'
+        )
         return
     }
 

@@ -19,6 +19,25 @@ export const setupInterceptors = (pinia: Pinia) => {
     api.interceptors.response.use(
         (response) => response,
         (error) => {
+            if (error.code === 'ERR_NETWORK') {
+                return Promise.reject({
+                    status: 0,
+                    message: 'Cannot connect to server',
+                })
+            }
+
+            const response = error.response
+
+            if (
+                response &&
+                typeof response.data === 'string'
+            ) {
+                return Promise.reject({
+                    status: 0,
+                    message: 'Backend is not running',
+                })
+            }
+            
             const status = error.response?.status ?? 0
             const data = error.response?.data
 

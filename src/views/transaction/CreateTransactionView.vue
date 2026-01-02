@@ -62,7 +62,7 @@ import CopyableInput from '@/components/CopyableInput.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { PaymentMethod } from '@/enums/PaymentMethod'
 import { PlusIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
-import type { CreateTransactionRequest } from '@/types/transactions/TransactionTypes'
+import type { CreateTransactionRequest, TransactionForm } from '@/types/transactions/TransactionTypes'
 import { transactionService } from '@/services/transactions/TransactionService'
 import { useApiError } from '@/composables/useApiError'
 import { showDialog } from '@/lib/errors/showDialog'
@@ -82,20 +82,38 @@ const transactionUuid = ref<string | null>(null)
 
 const { handleApiError } = useApiError()
 
+const FORM_LABELS: Record<keyof TransactionForm, string> = {
+    fullName: 'Full name',
+    email: 'Email',
+    amount: 'Amount',
+    currency: 'Currency',
+    paymentMethod: 'Payment method',
+    notificationUrl: 'Notification URL',
+    returnUrl: 'Return URL',
+}
+
 const createTransaction = async () => {
 
     const missing = getMissingFields({
-        Fullname: fullname.value,
-        Emial: email.value,
-        Amount: amount.value,
-        Currency: currency.value,
-        PaymentMethod: selectedPaymentMethod.value,
-        NotificationURL: notificationUrl.value,
-        ReturnURL: returnUrl.value,
+        fullName: fullname.value,
+        email: email.value,
+        amount: amount.value,
+        currency: currency.value,
+        paymentMethod: selectedPaymentMethod.value,
+        notificationUrl: notificationUrl.value,
+        returnUrl: returnUrl.value,
     })
 
     if (missing.length) {
-        await showDialog('warning', `Please fill in:<br>${missing.join(', ')}`, 'Incomplete form')
+        const message = missing
+            .map(field => FORM_LABELS[field])
+            .join(', ')
+
+        await showDialog(
+            'warning',
+            `Please fill in:<br>${message}`,
+            'Incomplete form'
+        )
         return
     }
 

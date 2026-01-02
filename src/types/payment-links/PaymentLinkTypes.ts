@@ -1,4 +1,6 @@
-export interface PaymentLinkRequest {
+import type { PaymentMethod } from "@/enums/PaymentMethod"
+
+export interface PaymentLinkBase {
     amount: number
     currency: string,
     expiresAt: Date,
@@ -31,6 +33,12 @@ export interface PaymentLinkDetailsResponse {
     transaction: TransactionDetails | null
 }
 
+export interface PaymentLinkDetailsForm {
+    fullName: string
+    email: string
+    paymentMethod: PaymentMethod
+}
+
 export interface ConfirmPaymentLinkRequest {
     paymentLinkId: string
     amount: number
@@ -43,3 +51,6 @@ export interface ConfirmPaymentLinkRequest {
 export interface ConfirmPaymentLinkResponse {
     link: string
 }
+
+export interface PaymentLinkRequest extends PaymentLinkBase { }
+export interface PaymentLinkForm extends PaymentLinkBase { }
