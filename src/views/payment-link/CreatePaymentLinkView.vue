@@ -50,7 +50,7 @@ import FormInput from '@/components/FormInput.vue'
 import CopyableInput from '@/components/CopyableInput.vue'
 import PageHeader from '@/components/PageHeader.vue';
 import { paymentLinkService } from '@/services/payment-links/PaymentLinkService'
-import type { PaymentLinkRequest } from '@/types/payment-links/PaymentLinkTypes'
+import type { PaymentLinkRequest, PaymentLinkForm } from '@/types/payment-links/PaymentLinkTypes'
 import { useApiError } from '@/composables/useApiError'
 import { showDialog } from '@/lib/errors/showDialog'
 import { getMissingFields } from '@/lib/errors/getMissingFields';
@@ -65,18 +65,34 @@ const paymentLink = ref<string | null>(null)
 
 const { handleApiError } = useApiError()
 
+const FORM_LABELS: Record<keyof PaymentLinkForm, string> = {
+    amount: 'Amount',
+    currency: 'Currency',
+    expiresAt: 'Expires At',
+    notificationUrl: 'Notification URL',
+    returnUrl: 'Return URL',
+}
+
 const createPaymentLink = async () => {
 
     const missing = getMissingFields({
-        Amount: amount.value,
-        Currency: currency.value,
-        ExpiresAt: expiresAt.value,
-        NotificationURL: notificationUrl.value,
-        ReturnURL: returnUrl.value,
+        amount: amount.value,
+        currency: currency.value,
+        expiresAt: expiresAt.value,
+        notificationUrl: notificationUrl.value,
+        returnUrl: returnUrl.value,
     })
 
     if (missing.length) {
-        await showDialog('warning', `Please fill in:<br>${missing.join(', ')}`, 'Incomplete form')
+        const message = missing
+            .map(field => FORM_LABELS[field])
+            .join(', ')
+
+        await showDialog(
+            'warning',
+            `Please fill in:<br>${message}`,
+            'Incomplete form'
+        )
         return
     }
 

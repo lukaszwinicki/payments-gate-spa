@@ -5,6 +5,8 @@ import { isHttpStatus } from './isHttpStatus'
 export function mapApiErrorToMessage(error: ApiError | unknown): string {
     const err = error as ApiError<BackendErrorData>
 
+    if (err?.data?.error) return err.data.error
+
     if (err?.message) return err.message
 
     if (typeof err?.status === 'number' && isHttpStatus(err.status)) {

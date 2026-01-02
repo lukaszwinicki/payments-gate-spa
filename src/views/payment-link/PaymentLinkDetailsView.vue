@@ -99,7 +99,6 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import Swal from 'sweetalert2'
 import { paymentMethods } from '@/constants/PaymentMethods'
 import PaymentMethodTile from '@/components/PaymentMethodTile.vue'
 import FormField from '@/components/FormField.vue'
@@ -109,7 +108,7 @@ import { paymentLinkService } from '@/services/payment-links/PaymentLinkService'
 import { PaymentMethod } from '@/enums/PaymentMethod'
 import { TransactionStatus } from '@/enums/TransactionStatus'
 import { getTransactionHeader, getTransactionMessage, getStatusColorClass } from '@/services/transactions/TransactionStatus'
-import type { ConfirmPaymentLinkRequest, PaymentLinkDetailsResponse } from '@/types/payment-links/PaymentLinkTypes'
+import type { ConfirmPaymentLinkRequest, PaymentLinkDetailsResponse, PaymentLinkDetailsForm } from '@/types/payment-links/PaymentLinkTypes'
 import { useApiError } from '@/composables/useApiError'
 import { showDialog } from '@/lib/errors/showDialog'
 import { getMissingFields } from '@/lib/errors/getMissingFields';
@@ -130,12 +129,21 @@ const transactionHeader = computed(() => getTransactionHeader(transaction.value?
 const transactionMessage = computed(() => getTransactionMessage(transaction.value?.status as TransactionStatus | undefined))
 const statusColorClass = computed(() => getStatusColorClass(transaction.value?.status as TransactionStatus | undefined))
 
+const TRANSACTION_LABELS = {
+  paymentLinkId: 'Transaction ID',
+  amount: 'Amount',
+  paymentMethod: 'Payment Method',
+  status: 'Status',
+} as const;
+
 const transactionDetails = computed(() => ({
-  'Transaction ID': payment.value?.payment.paymentLinkId ?? '-',
-  Amount: `${transaction.value?.amount ?? '-'} ${transaction.value?.currency ?? ''}`,
-  'Payment Method': transaction.value?.paymentMethod ?? '-',
-  Status: transaction.value?.status ?? '-',
-}))
+  [TRANSACTION_LABELS.paymentLinkId]: payment.value?.payment.paymentLinkId ?? '-',
+  [TRANSACTION_LABELS.amount]: transaction.value
+    ? `${transaction.value.amount ?? '-'} ${transaction.value.currency ?? ''}`
+    : '-',
+  [TRANSACTION_LABELS.paymentMethod]: transaction.value?.paymentMethod ?? '-',
+  [TRANSACTION_LABELS.status]: transaction.value?.status ?? '-',
+}));
 
 function returnToMerchant() {
   isLoading.value = true
@@ -191,16 +199,30 @@ const statusMessage = computed(() => {
   return { title, text, class: 'text-red-500' }
 })
 
+const FORM_LABELS: Record<keyof PaymentLinkDetailsForm, string> = {
+  fullName: 'Full name',
+  email: 'Email',
+  paymentMethod: 'Payment method',
+}
+
 const createTransaction = async () => {
 
   const missing = getMissingFields({
-    'Full name': fullname.value,
-    Email: email.value,
-    'Payment method': selectedPaymentMethod.value,
+    fullName: fullname.value,
+    email: email.value,
+    paymentMethod: selectedPaymentMethod.value,
   })
 
   if (missing.length) {
-    await showDialog('warning', `Please fill in:<br>${missing.join(', ')}`, 'Incomplete form')
+    const message = missing
+      .map(field => FORM_LABELS[field])
+      .join(', ')
+
+    await showDialog(
+      'warning',
+      `Please fill in:<br>${message}`,
+      'Incomplete form'
+    )
     return
   }
 

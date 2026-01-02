@@ -33,7 +33,6 @@
     </div>
 </template>
 
-
 <script lang="ts" setup>
 
 import { ref, computed, onMounted } from 'vue'
@@ -56,11 +55,18 @@ const transactionHeader = computed(() => getTransactionHeader(status.value as Tr
 const transactionMessage = computed(() => getTransactionMessage(status.value as TransactionStatus))
 const statusColorClass = computed(() => getStatusColorClass(status.value as TransactionStatus))
 
+const DETAIL_LABELS = {
+    transactionId: 'Transaction ID',
+    amount: 'Amount',
+    paymentMethod: 'Payment Method',
+    status: 'Status',
+} as const
+
 const transactionDetails = computed(() => ({
-    'Transaction ID': uuid ?? '-',
-    Amount: amount && currency ? `${amount.value ?? '-'} ${currency.value ?? ''}` : '-',
-    'Payment Method': paymentMethod ?? '-',
-    Status: status ?? '-',
+    [DETAIL_LABELS.transactionId]: uuid ?? '-',
+    [DETAIL_LABELS.amount]: (amount.value && currency.value) ? `${amount.value} ${currency.value}` : '-',
+    [DETAIL_LABELS.paymentMethod]: paymentMethod.value ?? '-',
+    [DETAIL_LABELS.status]: status.value ?? '-',
 }))
 
 function returnToMerchant() {

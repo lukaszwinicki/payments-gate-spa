@@ -1,3 +1,5 @@
+import type { PaymentMethod } from "@/enums/PaymentMethod"
+
 export interface TransactionStatusRequest {
     uuid: string
 }
@@ -50,5 +52,20 @@ export interface TransactionRow {
     status: { text: string; class: string; };
 }
 
-export type RefundTransactionRequest = { transactionUuid: string };
-export type RefundTransactionResponse = { transactionUuid: string };
+export interface TransactionForm {
+    fullName: string
+    email: string
+    amount: string
+    currency: string
+    paymentMethod: PaymentMethod
+    notificationUrl: string
+    returnUrl: string
+}
+
+export interface RefundTransactionBase {
+    transactionUuid: string
+}
+
+export interface RefundTransactionRequest extends RefundTransactionBase { }
+export interface RefundTransactionResponse extends RefundTransactionBase { }
+export interface RefundTransactionForm extends RefundTransactionBase { }
