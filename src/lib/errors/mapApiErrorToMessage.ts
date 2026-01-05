@@ -5,7 +5,15 @@ import { isHttpStatus } from './isHttpStatus'
 export function mapApiErrorToMessage(error: ApiError | unknown): string {
     const err = error as ApiError<BackendErrorData>
 
-    if (err?.data?.error) return err.data.error
+    if (err?.data?.error && typeof err.data.error === 'object') {
+        return Object.values(err.data.error)
+            .map(v => {
+                if (Array.isArray(v)) return v.join(' ')
+                if (typeof v === 'string') return v
+                return JSON.stringify(v)
+            })
+            .join('. ');
+    }
 
     if (err?.message) return err.message
 

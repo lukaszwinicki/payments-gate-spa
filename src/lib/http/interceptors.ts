@@ -49,10 +49,6 @@ export const setupInterceptors = (pinia: Pinia) => {
 
             let message = data?.message ?? 'Unexpected error'
 
-            if (status === 422 && data?.error) {
-                message = Object.values(data.error).flat().join(' ')
-            }
-
             const apiError: ApiError = {
                 status,
                 message,
