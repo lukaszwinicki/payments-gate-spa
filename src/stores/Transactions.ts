@@ -12,14 +12,15 @@ export const useTransactionsStore = defineStore('transactions', {
     async fetchTransactions() {
       this.isLoading = true
       try {
-        this.transactionsRaw = await transactionService.getTransctionsList()
+        const dto = await transactionService.getTransactionList()
+        this.transactionsRaw = dto.transactions
       } finally {
         this.isLoading = false
       }
     },
 
     getByUuid(uuid: string): Transaction | undefined {
-        return this.transactionsRaw.find(t => t.transactionUuid === uuid)
+      return this.transactionsRaw.find(t => t.transactionUuid === uuid)
     },
   },
 })

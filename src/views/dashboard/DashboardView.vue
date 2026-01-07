@@ -62,10 +62,11 @@ const headers = [
 const { handleApiError } = useApiError()
 
 onMounted(async () => {
+  isLoading.value = true
   try {
     const [
-      recentTransactions,
-      paymentMethodShare,
+      recentTransactionsDto,
+      paymentMethodShareDto,
       total,
       balances,
       rejeceted,
@@ -76,7 +77,8 @@ onMounted(async () => {
       dashboardService.getTransactionBalances(),
       dashboardService.getTransactionRejected(),
     ])
-    transactions.value = recentTransactions.map((t: RecentTransaction) => ({
+
+    transactions.value = recentTransactionsDto.transactions.map((t) => ({
       transactionUuid: t.transactionUuid,
       amount: `${t.amount} ${t.currency}`,
       paymentMethod: t.paymentMethod,
@@ -87,7 +89,7 @@ onMounted(async () => {
       date: formatDate(t.createdAt),
     }))
 
-    paymentMethods.value = paymentMethodShare
+    paymentMethods.value = paymentMethodShareDto.shares
     transactionsTotal.value = total
     transactionsBalances.value = balances
     transactionsRejected.value = rejeceted

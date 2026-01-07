@@ -66,6 +66,10 @@ export interface RefundTransactionBase {
     transactionUuid: string
 }
 
+export interface TransactionsListDto {
+    transactions: Transaction[]
+}
+
 export interface RefundTransactionRequest extends RefundTransactionBase { }
 export interface RefundTransactionResponse extends RefundTransactionBase { }
 export interface RefundTransactionForm extends RefundTransactionBase { }

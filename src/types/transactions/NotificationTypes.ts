@@ -13,3 +13,7 @@ export interface NotificationRow {
     statusType: { text: string; class: string; }
     createdAt: string
 }
+
+export interface TransactionNotificationsListDto {
+    notifications: Notification[]
+}

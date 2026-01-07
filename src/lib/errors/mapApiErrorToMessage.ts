@@ -15,6 +15,10 @@ export function mapApiErrorToMessage(error: ApiError | unknown): string {
             .join('. ');
     }
 
+    if (err?.data?.error && typeof err.data.error === 'string') {
+        return err.data.error
+    }
+
     if (err?.message) return err.message
 
     if (typeof err?.status === 'number' && isHttpStatus(err.status)) {

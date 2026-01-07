@@ -17,7 +17,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import { BellIcon } from '@heroicons/vue/24/outline'
 import { transactionService } from '@/services/transactions/TransactionService';
 import { statusClass, formatDate } from '@/utils/formatters'
-import type { Notification, NotificationRow } from '@/types/transactions/NotificationTypes';
+import type { Notification, NotificationRow, TransactionNotificationsListDto } from '@/types/transactions/NotificationTypes';
 import { useApiError } from '@/composables/useApiError'
 
 const isLoading = ref(false)
@@ -36,8 +36,8 @@ const { handleApiError } = useApiError()
 onMounted(async () => {
     isLoading.value = true;
     try {
-        const notificationsList = await transactionService.getNotificationList();
-        notifications.value = notificationsList.map((n: Notification) => ({
+        const notificationsDto: TransactionNotificationsListDto = await transactionService.getNotificationList()
+        notifications.value = notificationsDto.notifications.map((n: Notification) => ({
             id: n.id,
             transactionUuid: n.transactionUuid,
             status: {

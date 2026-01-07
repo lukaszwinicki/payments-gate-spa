@@ -7,10 +7,18 @@ export interface RecentTransaction {
     createdAt: string
 }
 
+export interface RecentTransactionsListDto {
+    transactions: RecentTransaction[]
+}
+
 export interface PaymentMethodShare {
     paymentMethod: string,
     count: number,
     percentage: number
+}
+
+export interface PaymentMethodShareResponse {
+    shares: PaymentMethodShare[]
 }
 
 export interface TransactionsTotalResponse {
@@ -37,6 +45,3 @@ export interface RecentTransactionDisplay {
     },
     date: string
 }
-
-export type RecentTransactionResponse = RecentTransaction[]
-export type PaymentMethodShareResponse = PaymentMethodShare[]

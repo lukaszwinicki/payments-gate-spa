@@ -83,8 +83,8 @@ const closeModal = () => {
 onMounted(async () => {
   isLoading.value = true;
   try {
-    const transactionsList = await transactionService.getTransctionsList();
-    transactions.value = transactionsList.map((t: Transaction) => ({
+    const transactionsDto = await transactionService.getTransactionList()
+    transactions.value = transactionsDto.transactions.map((t: Transaction) => ({
       id: t.id,
       transactionUuid: t.transactionUuid,
       fullname: t.fullname,

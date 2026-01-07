@@ -6,10 +6,10 @@ import type {
     RefundTransactionResponse,
     TransactionStatusRequest,
     TransactionStatusResponse,
-    Transaction
+    TransactionsListDto,
 } from '@/types/transactions/TransactionTypes'
 
-import type { Notification } from '@/types/transactions/NotificationTypes';
+import type { TransactionNotificationsListDto } from '@/types/transactions/NotificationTypes';
 import type { ApiCredentials } from '@/types/transactions/ApiCredentialsTypes';
 
 export class TransactionService {
@@ -29,13 +29,13 @@ export class TransactionService {
         return data
     }
 
-    async getTransctionsList(): Promise<Transaction[]> {
-        const { data } = await api.get<Transaction[]>('/transactions')
+    async getTransactionList(): Promise<TransactionsListDto> {
+        const { data } = await api.get<TransactionsListDto>('/transactions')
         return data
     }
 
-    async getNotificationList(): Promise<Notification[]> {
-        const { data } = await api.get<Notification[]>('/notifications')
+    async getNotificationList(): Promise<TransactionNotificationsListDto> {
+        const { data } = await api.get<TransactionNotificationsListDto>('/notifications')
         return data
     }
 
