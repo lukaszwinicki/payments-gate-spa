@@ -14,6 +14,6 @@ app.use(pinia)
 app.use(router)
 app.use(VueApexCharts)
 
-setupInterceptors(pinia)
+setupInterceptors(pinia, router)
 
 app.mount('#app')

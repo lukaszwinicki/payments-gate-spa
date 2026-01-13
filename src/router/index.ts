@@ -15,6 +15,13 @@ import ApiCredentialsView from '@/views/profile/ApiCredentialsView.vue'
 import TransactionDetailsView from '@/views/transaction/TransactionDetailsView.vue'
 import NotificationsView from '@/views/transaction/NotificationsView.vue'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
+import NotFoundView from '@/views/errors/NotFoundView.vue'
+import ForbiddenView from '@/views/errors/ForbiddenView.vue'
+import InternalServerErrorView from '@/views/errors/InternalServerErrorView.vue'
+import BadRequestView from '@/views/errors/BadRequestView.vue'
+import UnauthorizedView from '@/views/errors/UnauthorizedView.vue'
+import ServiceUnavailableView from '@/views/errors/ServiceUnavailableView.vue'
+import UnprocessableEntityView from '@/views/errors/UnprocessableEntityView.vue'
 
 const routes = [
   {
@@ -74,6 +81,41 @@ const routes = [
       { path: 'notifications', name: 'notifications', component: NotificationsView },
       { path: 'api-credentials', name: 'api-credentials', component: ApiCredentialsView },
     ]
+  },
+  {
+    path: '/400',
+    name: 'bad-request',
+    component: BadRequestView
+  },
+  {
+    path: '/401',
+    name: 'unauthorized',
+    component: UnauthorizedView
+  },
+  {
+    path: '/403',
+    name: 'forbidden',
+    component: ForbiddenView
+  },
+  {
+    path: '/422',
+    name: 'unprocessable-entity',
+    component: UnprocessableEntityView
+  },
+  {
+    path: '/500',
+    name: 'internal-server-error',
+    component: InternalServerErrorView
+  },
+  {
+    path: '/503',
+    name: 'service-unavailable',
+    component: ServiceUnavailableView
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: NotFoundView
   }
 ]
 
